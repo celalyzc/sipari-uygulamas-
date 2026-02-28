@@ -1,441 +1,300 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Garson Defteri PRO</title>
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<style>
+*{box-sizing:border-box}
+body{
+    font-family:Arial;
+    margin:auto;
+    background:#f5f5f5;
+    max-width:600px;
+    padding:10px;
+}
+h2{text-align:center}
 
-    <title>Garson Defteri</title>
+button{
+    width:100%;
+    padding:18px;
+    font-size:18px;
+    border:none;
+    border-radius:10px;
+    margin:5px 0;
+}
 
-    <style>
+#msg{
+    position:fixed;
+    top:20px;
+    left:50%;
+    transform:translateX(-50%);
+    background:#333;
+    color:white;
+    padding:12px;
+    border-radius:8px;
+    display:none;
+    z-index:999;
+}
 
-        * {
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
+#masalar{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:10px;
+}
 
-        body {
-            font-family: Arial;
-            margin: auto;
-            background: #f5f5f5;
-            max-width: 600px;
-            padding: 10px;
-        }
+#panel{
+    display:none;
+    background:white;
+    padding:15px;
+    border-radius:10px;
+}
 
-        #msg {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #333;
-            color: white;
-            padding: 12px;
-            border-radius: 8px;
-            display: none;
-            z-index: 999;
-        }
+.menu-item{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:12px;
+    background:#eee;
+    border-radius:8px;
+    margin:8px 0;
+}
 
-        #masalar {
-            display: grid;
-            grid-template-columns: repeat(2,1fr);
-            gap: 10px;
-        }
-
-        button {
-            width: 100%;
-            padding: 20px;
-            font-size: 20px;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-        }
-
-        /* Panel */
-
-        #panel {
-            display: none;
-            background: white;
-            padding: 15px;
-            border-radius: 10px;
-        }
-
-        /* Menü */
-
-        .menu-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px;
-            margin: 10px 0;
-            background: #f5f5f5;
-            border-radius: 8px;
-        }
-
-        .kategori-btn {
-            width: 100%;
-            margin-top: 15px;
-            background: #ddd;
-        }
-
-        #masaTitle {
-            text-align: center;
-            font-size: 26px;
-            margin-bottom: 20px;
-        }
-
-        /* Sipariş kart */
-
-        .siparis-kart {
-            font-size: 22px;
-            padding: 15px;
-            margin: 12px 0;
-            background: #f5f5f5;
-            border-radius: 10px;
-        }
-    </style>
+.siparis-kart{
+    padding:15px;
+    margin:10px 0;
+    background:#eee;
+    border-radius:10px;
+}
+</style>
 </head>
 
 <body>
 
-    <div id="msg"></div>
+<div id="msg"></div>
 
-    <h2>🍽 Garson Defteri</h2>
+<h2>🍽 Garson Defteri PRO</h2>
 
-    <div id="masalar"></div>
+<button onclick="dagitimEkrani()" style="background:#3498db;color:white">
+📋 Dağıtım Ekranı
+</button>
 
-    <div id="panel">
+<div id="masalar"></div>
 
-        <button style="background:#777;color:white;margin-bottom:15px"
-                onclick="anaSayfa()">
-            ⬅ Geri
-        </button>
+<div id="panel">
+<button onclick="anaSayfa()" style="background:#777;color:white">
+⬅ Geri
+</button>
+<div id="masaTitle"></div>
+<div id="icerik"></div>
+</div>
 
-        <div id="masaTitle"></div>
+<script>
 
-        <div id="icerik"></div>
+const MASA_SAYISI = 20;
 
-    </div>
+let aktifMasa = null;
+let temp = {};
 
-    <script>
+const menuData = {
+"🐔 TAVUK":[
+"Tavuk Germeç Ekmek",
+"Tavuk Germeç Dürüm",
+"Tavuk Şiş",
+"Tavuk Kanat"
+],
+"🥩 ET":[
+"Köfte Ekmek",
+"Adana Kebap",
+"Urfa Kebap",
+"Karışık Izgara"
+],
+"🫓 PİDE":[
+"Kıymalı Pide",
+"Kuşbaşılı Pide",
+"Lahmacun (Acılı)",
+"Lahmacun (Acısız)"
+],
+"🥤 İÇECEK":[
+"Kola",
+"Ayran",
+"Su"
+]
+};
 
-        /* VERİ */
+function mesaj(text){
+let box=document.getElementById("msg");
+box.innerText=text;
+box.style.display="block";
+setTimeout(()=>box.style.display="none",2000);
+}
 
-        let aktifMasa = null;
-        let temp = {};
+function anaSayfa(){
+document.getElementById("panel").style.display="none";
+document.getElementById("masalar").style.display="grid";
+renderMasalar();
+}
 
-        let kaydetOnay = false;
-        let kaydetTimer = null;
-
-        let silOnay = false;
-        let silTimer = null;
-
-        /* Menü */
-
-        const menuData = {
-
-            "🐔 TAVUK": [
-                "Tavuk Germeç Ekmek",
-                "Tavuk Germeç Dürüm",
-                "Tavuk Germeç Porsiyon",
-                "Tavuk Şiş",
-                "Tavuk Şiş Dürüm",
-                "Tavuk Kanat"
-            ],
-
-            "🥩 ET": [
-                "Köfte Ekmek",
-                "Köfte Dürüm",
-                "Köfte Porsiyon",
-                "Adana Kebap",
-                "Urfa Kebap",
-                "Beyti Kebap",
-                "Yoğurtlu Kebap",
-                "Adana Dürüm",
-                "Karışık Izgara"
-            ],
-
-            "🫓 PİDE": [
-                "Kıymalı Pide",
-                "Kıymalı Kaşarlı",
-                "Kuşbaşılı Pide",
-                "Kuşbaşılı Kaşarlı",
-                "Karışık Pide",
-                "Kaşarlı Pide",
-                "Sucuklu Kaşarlı",
-                "Lahmacun (Acılı)",
-                "Lahmacun (Acısız)"
-            ],
-
-            "🔥 KİREMİT": [
-                "Kiremitte Tavuk",
-                "Kiremitte Köfte",
-                "Kiremitte Karışık"
-            ],
-
-            "🥤 İÇECEK": [
-                "Kola",
-                "Ayran",
-                "Su",
-                "Şalgam",
-                "Sprite"
-            ]
-
-        };
-
-        /* MESAJ */
-
-        function mesaj(text) {
-
-            let box = document.getElementById("msg");
-
-            box.innerText = text;
-            box.style.display = "block";
-
-            setTimeout(() => box.style.display = "none", 2000);
-        }
-
-        /* BAŞLAT */
-
-        function anaSayfa() {
-
-            document.getElementById("panel").style.display = "none";
-            document.getElementById("masalar").style.display = "grid";
-
-            renderMasalar();
-
-        }
-
-        /* MASALAR */
-
-        function renderMasalar() {
-
-            let db = JSON.parse(localStorage.getItem("siparisler") || "{}");
-
-            let html = "";
-
-            for (let i = 1; i <= 20; i++) {
-
-                let sip = db["masa" + i];
-
-                let renk = "#e74c3c";
-
-                if (sip) renk = "#2ecc71";
-
-                html += `
+function renderMasalar(){
+let db=JSON.parse(localStorage.getItem("siparisler")||"{}");
+let html="";
+for(let i=1;i<=MASA_SAYISI;i++){
+let sip=db["masa"+i];
+let renk=sip?"#2ecc71":"#e74c3c";
+html+=`
 <button style="background:${renk};color:white"
 onclick="masaAc(${i})">
 Masa ${i}
-</button>
-`;
+</button>`;
+}
+document.getElementById("masalar").innerHTML=html;
+}
 
-            }
+function masaAc(masa){
+aktifMasa=masa;
+temp={};
 
-            document.getElementById("masalar").innerHTML = html;
+document.getElementById("masalar").style.display="none";
+document.getElementById("panel").style.display="block";
+document.getElementById("masaTitle").innerText="Masa "+masa;
 
-        }
+let db=JSON.parse(localStorage.getItem("siparisler")||"{}");
+let sip=db["masa"+masa];
 
-        /* MASA AÇ */
-
-        function masaAc(masa) {
-
-            aktifMasa = masa;
-            temp = {};
-
-            document.getElementById("masalar").style.display = "none";
-            document.getElementById("panel").style.display = "block";
-
-            document.getElementById("masaTitle").innerText = "Masa " + masa;
-
-            let db = JSON.parse(localStorage.getItem("siparisler") || "{}");
-            let sip = db["masa" + masa];
-
-            /* Sipariş varsa */
-
-            if (sip) {
-
-                let html = "<h2 style='text-align:center'>📋 Ürünler</h2>";
-
-                for (let k in sip.urunler) {
-
-                    html += `
+if(sip){
+let html=`<h3>📋 Sipariş</h3><p>⏰ ${sip.zaman}</p>`;
+for(let urun in sip.urunler){
+let u=sip.urunler[urun];
+html+=`
 <div class="siparis-kart">
-${k} : ${sip.urunler[k]}
-</div>
-`;
-
-                }
-
-                html += `
-<button style="background:#e74c3c;color:white"
-onclick="siparisSil(${masa})">
-🗑 Masa Boşalt
+<b>${urun}</b><br>
+${u.teslim} / ${u.adet}
+<br><br>
+<button onclick="teslimEt(${masa},'${urun}')"
+style="background:#27ae60;color:white">
+✔ Teslim
 </button>
-`;
+</div>`;
+}
+document.getElementById("icerik").innerHTML=html;
+return;
+}
 
-                document.getElementById("icerik").innerHTML = html;
-
-                return;
-            }
-
-            /* Sipariş alma */
-
-            let html = "";
-
-            for (let kategori in menuData) {
-
-                html += `
-<button class="kategori-btn"
-onclick="toggleKategori('${kategori}')">
+let html="";
+for(let kategori in menuData){
+html+=`
+<button onclick="toggleKategori('${kategori}')"
+style="background:#ddd">
 ${kategori}
 </button>
-
-<div id="menu_${kategori}"></div>
-`;
-            }
-
-            html += `
-<button style="background:#2ecc71;color:white;margin-top:20px"
-onclick="kaydet()">
+<div id="menu_${kategori}"></div>`;
+}
+html+=`
+<button onclick="kaydet()"
+style="background:#2ecc71;color:white;margin-top:15px">
 🍽 Sipariş Oluştur
-</button>
-`;
+</button>`;
+document.getElementById("icerik").innerHTML=html;
+}
 
-            document.getElementById("icerik").innerHTML = html;
-
-        }
-
-        /* KATEGORİ */
-
-        function toggleKategori(kategori) {
-
-            let el = document.getElementById("menu_" + kategori);
-
-            if (!el) return;
-
-            if (el.innerHTML != "") {
-                el.innerHTML = "";
-                return;
-            }
-
-            let liste = "";
-
-            menuData[kategori].forEach(item => {
-
-                liste += `
+function toggleKategori(kategori){
+let el=document.getElementById("menu_"+kategori);
+if(el.innerHTML!=""){el.innerHTML="";return;}
+let liste="";
+menuData[kategori].forEach(item=>{
+let miktar=temp[item]||0;
+let safeId=item.replace(/[^a-zA-Z0-9]/g,"_");
+liste+=`
 <div class="menu-item">
 <span>${item}</span>
-
 <div>
 <button onclick="adet('${item}',-1)">-</button>
-<span id="${item}" style="margin:0 15px">0</span>
+<span id="${safeId}" style="margin:0 10px">${miktar}</span>
 <button onclick="adet('${item}',1)">+</button>
 </div>
+</div>`;
+});
+el.innerHTML=liste;
+}
 
-</div>
-`;
+function adet(item,deg){
+if(!temp[item]) temp[item]=0;
+temp[item]+=deg;
+if(temp[item]<0) temp[item]=0;
+let safeId=item.replace(/[^a-zA-Z0-9]/g,"_");
+let el=document.getElementById(safeId);
+if(el) el.innerText=temp[item];
+}
 
-            });
+function kaydet(){
+let secilen=Object.entries(temp).filter(([k,v])=>v>0);
+if(secilen.length===0){
+mesaj("⚠ Ürün seçmedin");
+return;
+}
+let db=JSON.parse(localStorage.getItem("siparisler")||"{}");
+let now=new Date();
+let zaman=now.toLocaleTimeString("tr-TR",{hour:"2-digit",minute:"2-digit"});
+let urunObj={};
+secilen.forEach(([urun,adet])=>{
+urunObj[urun]={adet:adet,teslim:0};
+});
+db["masa"+aktifMasa]={urunler:urunObj,zaman:zaman};
+localStorage.setItem("siparisler",JSON.stringify(db));
+mesaj("✅ Sipariş kaydedildi");
+anaSayfa();
+}
 
-            el.innerHTML = liste;
-        }
+function teslimEt(masa,urun){
+let db=JSON.parse(localStorage.getItem("siparisler")||"{}");
+let sip=db["masa"+masa];
+if(!sip)return;
+let u=sip.urunler[urun];
+if(u.teslim<u.adet) u.teslim++;
+let hepsiBitti=Object.values(sip.urunler)
+.every(x=>x.teslim===x.adet);
+if(hepsiBitti){
+delete db["masa"+masa];
+mesaj("🎉 Masa tamamlandı!");
+}
+localStorage.setItem("siparisler",JSON.stringify(db));
+masaAc(masa);
+}
 
-        /* ADET */
+function dagitimEkrani(){
+let db=JSON.parse(localStorage.getItem("siparisler")||"{}");
+document.getElementById("masalar").style.display="none";
+document.getElementById("panel").style.display="block";
+document.getElementById("masaTitle").innerText="📋 Aktif Siparişler";
 
-        function adet(item, deg) {
+let html="";
+for(let masa in db){
+let sip=db[masa];
+for(let urun in sip.urunler){
+let u=sip.urunler[urun];
+if(u.teslim<u.adet){
+html+=`
+<div class="siparis-kart">
+<b>${urun}</b><br>
+${masa} → ${u.adet-u.teslim} adet
+<br><br>
+<button onclick="teslimEt(${masa.replace('masa','')},'${urun}')"
+style="background:#27ae60;color:white">
+✔ Teslim Et
+</button>
+</div>`;
+}
+}
+}
+if(html===""){
+html="<h3 style='text-align:center'>Tüm siparişler tamamlandı 🎉</h3>";
+}
+document.getElementById("icerik").innerHTML=html;
+}
 
-            if (!temp[item]) temp[item] = 0;
+anaSayfa();
 
-            temp[item] += deg;
-
-            if (temp[item] < 0) temp[item] = 0;
-
-            let el = document.getElementById(item);
-            if (el) el.innerText = temp[item];
-        }
-
-        /* KAYDET */
-
-        function kaydet() {
-
-            if (!kaydetOnay) {
-
-                let btn = document.querySelector("button[onclick='kaydet()']");
-
-                if (btn) btn.innerText = "✔ Tekrar basarak onayla";
-
-                kaydetOnay = true;
-
-                setTimeout(() => {
-                    kaydetOnay = false;
-                    if (btn) btn.innerText = "🍽 Sipariş Oluştur";
-                }, 3000);
-
-                return;
-            }
-
-            let db = JSON.parse(localStorage.getItem("siparisler") || "{}");
-
-            let now = new Date();
-
-            let zaman = now.toLocaleTimeString("tr-TR", {
-                hour: "2-digit",
-                minute: "2-digit"
-            });
-
-            db["masa" + aktifMasa] = {
-                urunler: temp,
-                zaman: zaman
-            };
-
-            localStorage.setItem("siparisler", JSON.stringify(db));
-
-            mesaj("✅ Sipariş kaydedildi");
-
-            anaSayfa();
-
-            kaydetOnay = false;
-
-        }
-
-        /* SİL */
-
-        function siparisSil(masa) {
-
-            if (!silOnay) {
-
-                let btn = document.querySelector("button[onclick='siparisSil(" + masa + ")']");
-
-                if (btn) btn.innerText = "✔ Tekrar basarak onayla";
-
-                silOnay = true;
-
-                setTimeout(() => {
-                    silOnay = false;
-                    if (btn) btn.innerText = "🗑 Masa Boşalt";
-                }, 3000);
-
-                return;
-            }
-
-            let db = JSON.parse(localStorage.getItem("siparisler") || "{}");
-
-            delete db["masa" + masa];
-
-            localStorage.setItem("siparisler", JSON.stringify(db));
-
-            mesaj("🗑 Masa boşaltıldı");
-
-            anaSayfa();
-
-            silOnay = false;
-
-        }
-
-        /* START */
-
-        anaSayfa();
-
-    </script>
-
+</script>
 </body>
 </html>
