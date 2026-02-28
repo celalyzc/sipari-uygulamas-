@@ -3,69 +3,90 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Garson Defteri PRO</title>
+<title>Garson Defteri</title>
 
 <style>
-*{box-sizing:border-box}
+*{box-sizing:border-box;margin:0;padding:0}
 body{
     font-family:Arial;
     margin:auto;
     background:#f5f5f5;
-    max-width:600px;
-    padding:10px;
+    max-width:500px;
+    padding:8px;
+    font-size:14px;
 }
-h2{text-align:center}
+h2{text-align:center;margin-bottom:6px;font-size:18px}
 
 button{
-    width:100%;
-    padding:18px;
-    font-size:18px;
     border:none;
-    border-radius:10px;
-    margin:5px 0;
+    border-radius:8px;
+    font-size:14px;
+    cursor:pointer;
 }
 
 #msg{
     position:fixed;
-    top:20px;
+    top:15px;
     left:50%;
     transform:translateX(-50%);
     background:#333;
     color:white;
-    padding:12px;
-    border-radius:8px;
+    padding:8px;
+    border-radius:6px;
     display:none;
     z-index:999;
+    font-size:13px;
 }
 
 #masalar{
     display:grid;
-    grid-template-columns:repeat(2,1fr);
-    gap:10px;
+    grid-template-columns:repeat(4,1fr);
+    gap:6px;
+}
+
+.masa-btn{
+    padding:12px 0;
+    font-size:14px;
+    color:white;
 }
 
 #panel{
     display:none;
     background:white;
-    padding:15px;
-    border-radius:10px;
+    padding:8px;
+    border-radius:8px;
 }
 
 .menu-item{
     display:flex;
     justify-content:space-between;
     align-items:center;
-    padding:12px;
     background:#eee;
-    border-radius:8px;
-    margin:8px 0;
+    padding:6px;
+    margin:4px 0;
+    border-radius:6px;
+    font-size:13px;
+}
+
+.adet-kontrol{
+    display:flex;
+    align-items:center;
+    gap:6px;
+}
+
+.adet-kontrol button{
+    width:28px;
+    height:28px;
+    font-size:16px;
+    background:#ddd;
 }
 
 .siparis-kart{
-    padding:15px;
-    margin:10px 0;
     background:#eee;
-    border-radius:10px;
+    padding:8px;
+    margin:5px 0;
+    border-radius:6px;
+    font-size:13px;
 }
 </style>
 </head>
@@ -74,52 +95,43 @@ button{
 
 <div id="msg"></div>
 
-<h2>🍽 Garson Defteri PRO</h2>
+<h2>🍽 Garson Defteri</h2>
 
-<button onclick="dagitimEkrani()" style="background:#3498db;color:white">
-📋 Dağıtım Ekranı
+<button onclick="dagitimEkrani()" 
+style="width:100%;padding:8px;background:#3498db;color:white;margin-bottom:6px">
+📋 Dağıtım
 </button>
 
 <div id="masalar"></div>
 
 <div id="panel">
-<button onclick="anaSayfa()" style="background:#777;color:white">
+<button onclick="anaSayfa()" 
+style="width:100%;padding:6px;background:#777;color:white;margin-bottom:6px">
 ⬅ Geri
 </button>
-<div id="masaTitle"></div>
+<div id="masaTitle" style="text-align:center;font-weight:bold;margin-bottom:6px"></div>
 <div id="icerik"></div>
 </div>
 
 <script>
 
 const MASA_SAYISI = 20;
+let aktifMasa=null;
+let temp={};
 
-let aktifMasa = null;
-let temp = {};
-
-const menuData = {
-"🐔 TAVUK":[
-"Tavuk Germeç Ekmek",
-"Tavuk Germeç Dürüm",
-"Tavuk Şiş",
-"Tavuk Kanat"
+const menuData={
+"Menüler":[
+"Lahmacun Menü",
+"Tavuk Şiş Menü",
+"Beyti Menü",
+"Adana Menü"
 ],
-"🥩 ET":[
-"Köfte Ekmek",
-"Adana Kebap",
-"Urfa Kebap",
-"Karışık Izgara"
-],
-"🫓 PİDE":[
+"Pideler":[
 "Kıymalı Pide",
+"Kaşarlı Pide",
 "Kuşbaşılı Pide",
-"Lahmacun (Acılı)",
-"Lahmacun (Acısız)"
-],
-"🥤 İÇECEK":[
-"Kola",
-"Ayran",
-"Su"
+"Kuşbaşı Kaşarlı Pide",
+"Karışık Pide"
 ]
 };
 
@@ -127,7 +139,7 @@ function mesaj(text){
 let box=document.getElementById("msg");
 box.innerText=text;
 box.style.display="block";
-setTimeout(()=>box.style.display="none",2000);
+setTimeout(()=>box.style.display="none",1500);
 }
 
 function anaSayfa(){
@@ -143,9 +155,10 @@ for(let i=1;i<=MASA_SAYISI;i++){
 let sip=db["masa"+i];
 let renk=sip?"#2ecc71":"#e74c3c";
 html+=`
-<button style="background:${renk};color:white"
+<button class="masa-btn"
+style="background:${renk}"
 onclick="masaAc(${i})">
-Masa ${i}
+${i}
 </button>`;
 }
 document.getElementById("masalar").innerHTML=html;
@@ -163,16 +176,16 @@ let db=JSON.parse(localStorage.getItem("siparisler")||"{}");
 let sip=db["masa"+masa];
 
 if(sip){
-let html=`<h3>📋 Sipariş</h3><p>⏰ ${sip.zaman}</p>`;
+let html="";
 for(let urun in sip.urunler){
 let u=sip.urunler[urun];
 html+=`
 <div class="siparis-kart">
 <b>${urun}</b><br>
 ${u.teslim} / ${u.adet}
-<br><br>
+<br>
 <button onclick="teslimEt(${masa},'${urun}')"
-style="background:#27ae60;color:white">
+style="width:100%;margin-top:4px;background:#27ae60;color:white;padding:4px">
 ✔ Teslim
 </button>
 </div>`;
@@ -183,39 +196,26 @@ return;
 
 let html="";
 for(let kategori in menuData){
-html+=`
-<button onclick="toggleKategori('${kategori}')"
-style="background:#ddd">
-${kategori}
-</button>
-<div id="menu_${kategori}"></div>`;
-}
-html+=`
-<button onclick="kaydet()"
-style="background:#2ecc71;color:white;margin-top:15px">
-🍽 Sipariş Oluştur
-</button>`;
-document.getElementById("icerik").innerHTML=html;
-}
-
-function toggleKategori(kategori){
-let el=document.getElementById("menu_"+kategori);
-if(el.innerHTML!=""){el.innerHTML="";return;}
-let liste="";
 menuData[kategori].forEach(item=>{
 let miktar=temp[item]||0;
 let safeId=item.replace(/[^a-zA-Z0-9]/g,"_");
-liste+=`
+html+=`
 <div class="menu-item">
 <span>${item}</span>
-<div>
+<div class="adet-kontrol">
 <button onclick="adet('${item}',-1)">-</button>
-<span id="${safeId}" style="margin:0 10px">${miktar}</span>
+<span id="${safeId}">${miktar}</span>
 <button onclick="adet('${item}',1)">+</button>
 </div>
 </div>`;
 });
-el.innerHTML=liste;
+}
+html+=`
+<button onclick="kaydet()" 
+style="width:100%;padding:6px;background:#2ecc71;color:white;margin-top:6px">
+✔ Sipariş
+</button>`;
+document.getElementById("icerik").innerHTML=html;
 }
 
 function adet(item,deg){
@@ -230,7 +230,7 @@ if(el) el.innerText=temp[item];
 function kaydet(){
 let secilen=Object.entries(temp).filter(([k,v])=>v>0);
 if(secilen.length===0){
-mesaj("⚠ Ürün seçmedin");
+mesaj("Ürün seçmedin");
 return;
 }
 let db=JSON.parse(localStorage.getItem("siparisler")||"{}");
@@ -242,7 +242,7 @@ urunObj[urun]={adet:adet,teslim:0};
 });
 db["masa"+aktifMasa]={urunler:urunObj,zaman:zaman};
 localStorage.setItem("siparisler",JSON.stringify(db));
-mesaj("✅ Sipariş kaydedildi");
+mesaj("Kaydedildi");
 anaSayfa();
 }
 
@@ -256,7 +256,7 @@ let hepsiBitti=Object.values(sip.urunler)
 .every(x=>x.teslim===x.adet);
 if(hepsiBitti){
 delete db["masa"+masa];
-mesaj("🎉 Masa tamamlandı!");
+mesaj("Masa tamamlandı");
 }
 localStorage.setItem("siparisler",JSON.stringify(db));
 masaAc(masa);
@@ -266,7 +266,7 @@ function dagitimEkrani(){
 let db=JSON.parse(localStorage.getItem("siparisler")||"{}");
 document.getElementById("masalar").style.display="none";
 document.getElementById("panel").style.display="block";
-document.getElementById("masaTitle").innerText="📋 Aktif Siparişler";
+document.getElementById("masaTitle").innerText="Dağıtım";
 
 let html="";
 for(let masa in db){
@@ -277,19 +277,17 @@ if(u.teslim<u.adet){
 html+=`
 <div class="siparis-kart">
 <b>${urun}</b><br>
-${masa} → ${u.adet-u.teslim} adet
-<br><br>
+${masa} → ${u.adet-u.teslim}
+<br>
 <button onclick="teslimEt(${masa.replace('masa','')},'${urun}')"
-style="background:#27ae60;color:white">
-✔ Teslim Et
+style="width:100%;margin-top:4px;background:#27ae60;color:white;padding:4px">
+✔ Teslim
 </button>
 </div>`;
 }
 }
 }
-if(html===""){
-html="<h3 style='text-align:center'>Tüm siparişler tamamlandı 🎉</h3>";
-}
+if(html==="") html="<p style='text-align:center'>Tüm siparişler bitti</p>";
 document.getElementById("icerik").innerHTML=html;
 }
 
