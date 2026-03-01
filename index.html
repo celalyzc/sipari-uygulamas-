@@ -3,49 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Garson Defteri Pro</title>
+    <title>Garson Defteri Pro + WhatsApp</title>
     <style>
-        :root { --ana-renk: #e67e22; --sil-renk: #e74c3c; --onay-renk: #27ae60; --arka-plan: #121212; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--arka-plan); color: #fff; margin: 0; padding: 10px; }
+        :root { --ana-renk: #e67e22; --sil-renk: #e74c3c; --onay-renk: #27ae60; --wp-renk: #25d366; --arka-plan: #121212; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--arka-plan); color: #fff; margin: 0; padding: 10px; padding-bottom: 50px; }
         .panel { background: #1e1e1e; padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #333; }
         h2 { text-align: center; color: var(--ana-renk); margin-top: 5px; }
         
         select { width: 100%; padding: 15px; border-radius: 8px; font-size: 18px; margin-bottom: 10px; background: #2c2c2c; color: white; border: 2px solid var(--ana-renk); }
         
-        /* Ürün Butonları */
         .urun-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .urun-btn { background: #2c2c2c; color: white; border: 1px solid #444; padding: 18px 5px; border-radius: 8px; font-size: 14px; position: relative; }
-        .badge { position: absolute; top: -8px; right: -8px; background: var(--onay-renk); border-radius: 10px; padding: 2px 8px; font-size: 12px; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+        .badge { position: absolute; top: -8px; right: -8px; background: var(--onay-renk); border-radius: 10px; padding: 2px 8px; font-size: 12px; font-weight: bold; }
 
-        /* Masa Durumu */
         #masaDurum { background: #2d3436; padding: 10px; border-radius: 8px; margin-bottom: 10px; font-size: 14px; border-left: 4px solid #f1c40f; display: none; }
 
         .aksiyon-btn { width: 100%; border: none; padding: 15px; border-radius: 8px; font-size: 16px; font-weight: bold; margin-top: 10px; cursor: pointer; }
         .kaydet { background: var(--ana-renk); color: white; }
         .ozet-btn { background: #3498db; color: white; margin-bottom: 10px; }
+        .wp-btn { background: var(--wp-renk); color: white; display: none; } /* Başta gizli */
+        .sifirla-btn { background: var(--sil-renk); color: white; margin-top: 30px; opacity: 0.8; }
         
-        /* Dağıtım */
         .dagitim-grup { background: #1e1e1e; margin-bottom: 15px; border-radius: 8px; overflow: hidden; border: 1px solid #333; }
         .urun-baslik { background: #333; padding: 10px; font-weight: bold; color: var(--ana-renk); display: flex; justify-content: space-between; }
         .kart { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-top: 1px solid #2c2c2c; }
         .teslim-btn { background: var(--onay-renk); color: white; border: none; padding: 8px 12px; border-radius: 6px; }
 
-        /* Modal (Özet Ekranı) */
         #ozetModal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:100; padding:20px; box-sizing:border-box; }
-        .modal-icerik { background:#222; padding:20px; border-radius:15px; max-height:80%; overflow-y:auto; }
+        .modal-icerik { background:#222; padding:20px; border-radius:15px; max-height:80%; overflow-y:auto; border:1px solid var(--ana-renk); }
     </style>
 </head>
 <body>
 
-    <h2>🍽 GARSON DEFTERİ</h2>
-
-    <div id="ozetModal">
-        <div class="modal-icerik">
-            <h3 style="color:var(--ana-renk)">📊 Mutfak Toplam Liste</h3>
-            <div id="ozetListe"></div>
-            <button class="aksiyon-btn" style="background:#555" onclick="modalKapat()">Kapat</button>
-        </div>
-    </div>
+    <h2>🍽 GARSON DEFTERİ PRO</h2>
 
     <button class="aksiyon-btn ozet-btn" onclick="ozetGoster()">📋 TOPLAM MUTFAK LİSTESİ</button>
 
@@ -55,7 +45,6 @@
         </select>
 
         <div id="masaDurum"></div>
-
         <div class="urun-grid" id="urunler"></div>
 
         <button class="aksiyon-btn kaydet" onclick="kaydet()">Siparişi Kaydet / Güncelle ➕</button>
@@ -65,16 +54,36 @@
     <h3 style="text-align:center">🚀 DAĞITILACAKLAR</h3>
     <div id="dagitim"></div>
 
+    <button class="aksiyon-btn sifirla-btn" onclick="tumSistemiResetle()">⚠️ TÜM SİSTEMİ SIFIRLA</button>
+
+    <div id="ozetModal">
+        <div class="modal-icerik">
+            <h3 style="color:var(--ana-renk); text-align:center;">📊 Mutfak Toplam Liste</h3>
+            <div id="ozetListe"></div>
+            <button id="wpSendBtn" class="aksiyon-btn wp-btn" onclick="whatsappGonder()">WhatsApp ile Gönder ✅</button>
+            <button class="aksiyon-btn" style="background:#555" onclick="modalKapat()">Kapat</button>
+        </div>
+    </div>
+
 <script>
-    const MASA_SAYISI = 20;
     const urunList = ["Lahmacun Menü", "Tavuk Şiş Menü", "Beyti Menü", "Adana Menü", "Kıymalı Pide", "Kaşarlı Pide", "Kuşbaşılı Pide", "Kuşbaşı Kaşarlı Pide", "Karışık Pide"];
+    const OzelMasalar = ["Personel Masası", "Fırın Yanı", "Yeni Masa", "Şark Köşesi"];
     let temp = {};
 
     function init() {
         const select = document.getElementById("masaSelect");
-        for(let i=1; i<=MASA_SAYISI; i++) {
-            select.innerHTML += `<option value="${i}">Masa ${i}</option>`;
+        for(let i=1; i<=15; i++) {
+            let opt = document.createElement("option");
+            opt.value = "Masa " + i;
+            opt.innerText = "Masa " + i;
+            select.appendChild(opt);
         }
+        OzelMasalar.forEach(m => {
+            let opt = document.createElement("option");
+            opt.value = m;
+            opt.innerText = m;
+            select.appendChild(opt);
+        });
 
         const urunDiv = document.getElementById("urunler");
         urunList.forEach(u => {
@@ -89,21 +98,20 @@
 
     function idYap(text) { return text.replace(/[^a-zA-Z0-9]/g, "_"); }
 
-    // Masa seçildiğinde mevcut durumu göster
     function masaDegisti() {
-        const masaNo = document.getElementById("masaSelect").value;
+        const masaKey = document.getElementById("masaSelect").value;
         const durumDiv = document.getElementById("masaDurum");
-        if(!masaNo) { durumDiv.style.display = "none"; return; }
+        if(!masaKey) { durumDiv.style.display = "none"; return; }
 
         let db = JSON.parse(localStorage.getItem("siparisler") || "{}");
-        let mevcut = db["Masa " + masaNo];
+        let mevcut = db[masaKey];
 
         if(mevcut) {
             let liste = Object.entries(mevcut).map(([u, a]) => `<b>${a}</b> ${u}`).join(", ");
-            durumDiv.innerHTML = `📍 <b>Masa ${masaNo} Güncel:</b> ${liste}`;
+            durumDiv.innerHTML = `📍 <b>${masaKey} Güncel:</b> ${liste}`;
             durumDiv.style.display = "block";
         } else {
-            durumDiv.innerHTML = `📍 <b>Masa ${masaNo}</b> şu an boş.`;
+            durumDiv.innerHTML = `📍 <b>${masaKey}</b> şu an boş.`;
             durumDiv.style.display = "block";
         }
     }
@@ -139,14 +147,13 @@
     }
 
     function kaydet() {
-        const masaNo = document.getElementById("masaSelect").value;
-        if(!masaNo) return alert("Masa seçmedin!");
+        const masaKey = document.getElementById("masaSelect").value;
+        if(!masaKey) return alert("Masa seçmedin!");
         
         const secilenler = Object.entries(temp);
         if(secilenler.length === 0) return alert("Ürün eklemedin!");
 
         let db = JSON.parse(localStorage.getItem("siparisler") || "{}");
-        let masaKey = "Masa " + masaNo;
         if(!db[masaKey]) db[masaKey] = {};
 
         secilenler.forEach(([urun, adet]) => {
@@ -172,15 +179,48 @@
         }
 
         let html = "";
-        for(let u in toplamlar) {
-            html += `<div style="padding:10px; border-bottom:1px solid #444; display:flex; justify-content:space-between">
-                        <span>${u}</span> <span style="color:var(--ana-renk); font-weight:bold">${toplamlar[u]} Adet</span>
+        Object.keys(toplamlar).forEach(urun => {
+            html += `<div style="padding:12px; border-bottom:1px solid #444; display:flex; justify-content:space-between; font-size:16px;">
+                        <span>${urun}</span> <span style="color:var(--ana-renk); font-weight:bold">${toplamlar[urun]} Adet</span>
                      </div>`;
+        });
+
+        document.getElementById("ozetListe").innerHTML = html || "<p style='text-align:center'>Bekleyen sipariş yok.</p>";
+        
+        const wpBtn = document.getElementById("wpSendBtn");
+        if(genelAdet > 0) {
+            document.getElementById("ozetListe").innerHTML += `<h3 style="text-align:center; color:var(--onay-renk); margin-top:15px;">TOPLAM: ${genelAdet} ÜRÜN</h3>`;
+            wpBtn.style.display = "block";
+        } else {
+            wpBtn.style.display = "none";
+        }
+        
+        document.getElementById("ozetModal").style.display = "block";
+    }
+
+    function whatsappGonder() {
+        let db = JSON.parse(localStorage.getItem("siparisler") || "{}");
+        let mesaj = "*🚀 MUTFAK SİPARİŞ LİSTESİ*\n--------------------------\n";
+        let toplamlar = {};
+
+        // Önce masa bazlı detayları ekle
+        for(let m in db) {
+            mesaj += `\n*${m}:* `;
+            let urunler = [];
+            for(let u in db[m]) {
+                urunler.push(`${db[m][u]} x ${u}`);
+                toplamlar[u] = (toplamlar[u] || 0) + db[m][u];
+            }
+            mesaj += urunler.join(", ");
         }
 
-        document.getElementById("ozetListe").innerHTML = html || "Sipariş yok.";
-        document.getElementById("ozetListe").innerHTML += `<h4 style="text-align:right">Toplam Ürün: ${genelAdet}</h4>`;
-        document.getElementById("ozetModal").style.display = "block";
+        mesaj += "\n\n*📊 GENEL TOPLAM:*";
+        for(let u in toplamlar) {
+            mesaj += `\n- ${u}: ${toplamlar[u]} Adet`;
+        }
+
+        const encodedMesaj = encodeURIComponent(mesaj);
+        window.open(`https://wa.me/?text=${encodedMesaj}`, '_blank');
     }
 
     function modalKapat() { document.getElementById("ozetModal").style.display = "none"; }
@@ -195,7 +235,7 @@
             let toplamUrun = 0;
 
             for (let masa in db) {
-                if (db[masa][urun]) {
+                if (db[masa] && db[masa][urun]) {
                     toplamUrun += db[masa][urun];
                     urunGrubuHtml += `
                         <div class="kart">
@@ -217,12 +257,24 @@
 
     function teslim(masa, urun) {
         let db = JSON.parse(localStorage.getItem("siparisler") || "{}");
-        db[masa][urun]--;
-        if(db[masa][urun] <= 0) delete db[masa][urun];
-        if(Object.keys(db[masa]).length === 0) delete db[masa];
+        if(db[masa] && db[masa][urun]) {
+            db[masa][urun]--;
+            if(db[masa][urun] <= 0) delete db[masa][urun];
+            if(Object.keys(db[masa]).length === 0) delete db[masa];
+        }
         localStorage.setItem("siparisler", JSON.stringify(db));
         dagitimGoster();
-        if(document.getElementById("masaSelect").value) masaDegisti();
+        masaDegisti();
+    }
+
+    function tumSistemiResetle() {
+        if(confirm("TÜM SİSTEMİ SIFIRLA?")) {
+            localStorage.removeItem("siparisler");
+            tempSifirla();
+            document.getElementById("masaSelect").selectedIndex = 0;
+            masaDegisti();
+            dagitimGoster();
+        }
     }
 
     init();
