@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Garson Defteri Pro + WhatsApp</title>
+    <title>Garson Defteri Pro v4</title>
     <style>
         :root { --ana-renk: #e67e22; --sil-renk: #e74c3c; --onay-renk: #27ae60; --wp-renk: #25d366; --arka-plan: #121212; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--arka-plan); color: #fff; margin: 0; padding: 10px; padding-bottom: 50px; }
@@ -21,7 +21,7 @@
         .aksiyon-btn { width: 100%; border: none; padding: 15px; border-radius: 8px; font-size: 16px; font-weight: bold; margin-top: 10px; cursor: pointer; }
         .kaydet { background: var(--ana-renk); color: white; }
         .ozet-btn { background: #3498db; color: white; margin-bottom: 10px; }
-        .wp-btn { background: var(--wp-renk); color: white; display: none; } /* Başta gizli */
+        .wp-btn { background: var(--wp-renk); color: white; display: none; }
         .sifirla-btn { background: var(--sil-renk); color: white; margin-top: 30px; opacity: 0.8; }
         
         .dagitim-grup { background: #1e1e1e; margin-bottom: 15px; border-radius: 8px; overflow: hidden; border: 1px solid #333; }
@@ -171,21 +171,24 @@
         let toplamlar = {};
         let genelAdet = 0;
 
+        // Sadece urunList içindeki gerçek yemekleri sayıyoruz
         for(let m in db) {
             for(let u in db[m]) {
-                toplamlar[u] = (toplamlar[u] || 0) + db[m][u];
-                genelAdet += db[m][u];
+                if(urunList.includes(u)) {
+                    toplamlar[u] = (toplamlar[u] || 0) + db[m][u];
+                    genelAdet += db[m][u];
+                }
             }
         }
 
         let html = "";
-        Object.keys(toplamlar).forEach(urun => {
+        Object.keys(toplamlar).sort().forEach(urun => {
             html += `<div style="padding:12px; border-bottom:1px solid #444; display:flex; justify-content:space-between; font-size:16px;">
                         <span>${urun}</span> <span style="color:var(--ana-renk); font-weight:bold">${toplamlar[urun]} Adet</span>
                      </div>`;
         });
 
-        document.getElementById("ozetListe").innerHTML = html || "<p style='text-align:center'>Bekleyen sipariş yok.</p>";
+        document.getElementById("ozetListe").innerHTML = html || "<p style='text-align:center'>Bekleyen yemek siparişi yok.</p>";
         
         const wpBtn = document.getElementById("wpSendBtn");
         if(genelAdet > 0) {
@@ -203,15 +206,17 @@
         let mesaj = "*🚀 MUTFAK SİPARİŞ LİSTESİ*\n--------------------------\n";
         let toplamlar = {};
 
-        // Önce masa bazlı detayları ekle
         for(let m in db) {
-            mesaj += `\n*${m}:* `;
-            let urunler = [];
+            let masaIcerik = [];
             for(let u in db[m]) {
-                urunler.push(`${db[m][u]} x ${u}`);
-                toplamlar[u] = (toplamlar[u] || 0) + db[m][u];
+                if(urunList.includes(u)) {
+                    masaIcerik.push(`${db[m][u]} x ${u}`);
+                    toplamlar[u] = (toplamlar[u] || 0) + db[m][u];
+                }
             }
-            mesaj += urunler.join(", ");
+            if(masaIcerik.length > 0) {
+                mesaj += `\n*${m}:* ` + masaIcerik.join(", ");
+            }
         }
 
         mesaj += "\n\n*📊 GENEL TOPLAM:*";
@@ -219,8 +224,7 @@
             mesaj += `\n- ${u}: ${toplamlar[u]} Adet`;
         }
 
-        const encodedMesaj = encodeURIComponent(mesaj);
-        window.open(`https://wa.me/?text=${encodedMesaj}`, '_blank');
+        window.open(`https://wa.me/?text=${encodeURIComponent(mesaj)}`, '_blank');
     }
 
     function modalKapat() { document.getElementById("ozetModal").style.display = "none"; }
@@ -269,7 +273,7 @@
 
     function tumSistemiResetle() {
         if(confirm("TÜM SİSTEMİ SIFIRLA?")) {
-            localStorage.removeItem("siparisler");
+            localStorage.clear();
             tempSifirla();
             document.getElementById("masaSelect").selectedIndex = 0;
             masaDegisti();
