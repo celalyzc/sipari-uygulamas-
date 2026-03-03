@@ -3,18 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Garson Defteri Pro v4</title>
+    <title>Divan Restoran v5</title>
     <style>
         :root { --ana-renk: #e67e22; --sil-renk: #e74c3c; --onay-renk: #27ae60; --wp-renk: #25d366; --arka-plan: #121212; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--arka-plan); color: #fff; margin: 0; padding: 10px; padding-bottom: 50px; }
         .panel { background: #1e1e1e; padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #333; }
-        h2 { text-align: center; color: var(--ana-renk); margin-top: 5px; }
+        h2 { text-align: center; color: var(--ana-renk); margin-top: 5px; text-transform: uppercase; letter-spacing: 1px; }
         
-        select { width: 100%; padding: 15px; border-radius: 8px; font-size: 18px; margin-bottom: 10px; background: #2c2c2c; color: white; border: 2px solid var(--ana-renk); }
+        select { width: 100%; padding: 15px; border-radius: 8px; font-size: 18px; margin-bottom: 10px; background: #2c2c2c; color: white; border: 2px solid var(--ana-renk); outline: none; }
         
-        .urun-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .urun-btn { background: #2c2c2c; color: white; border: 1px solid #444; padding: 18px 5px; border-radius: 8px; font-size: 14px; position: relative; }
-        .badge { position: absolute; top: -8px; right: -8px; background: var(--onay-renk); border-radius: 10px; padding: 2px 8px; font-size: 12px; font-weight: bold; }
+        /* Kategori Başlıkları */
+        .kat-baslik { color: var(--ana-renk); font-size: 14px; font-weight: bold; margin: 15px 0 5px 5px; border-bottom: 1px solid #333; padding-bottom: 3px; }
+        
+        .urun-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .urun-btn { background: #2c2c2c; color: white; border: 1px solid #444; padding: 15px 5px; border-radius: 8px; font-size: 13px; position: relative; transition: 0.2s; }
+        .urun-btn:active { background: #444; }
+        .badge { position: absolute; top: -8px; right: -8px; background: var(--onay-renk); border-radius: 10px; padding: 2px 8px; font-size: 11px; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.5); }
 
         #masaDurum { background: #2d3436; padding: 10px; border-radius: 8px; margin-bottom: 10px; font-size: 14px; border-left: 4px solid #f1c40f; display: none; }
 
@@ -22,15 +26,15 @@
         .kaydet { background: var(--ana-renk); color: white; }
         .ozet-btn { background: #3498db; color: white; margin-bottom: 10px; }
         .wp-btn { background: var(--wp-renk); color: white; display: none; }
-        .sifirla-btn { background: var(--sil-renk); color: white; margin-top: 30px; opacity: 0.8; }
+        .sifirla-btn { background: var(--sil-renk); color: white; margin-top: 40px; opacity: 0.6; font-size: 12px; padding: 10px; }
         
         .dagitim-grup { background: #1e1e1e; margin-bottom: 15px; border-radius: 8px; overflow: hidden; border: 1px solid #333; }
         .urun-baslik { background: #333; padding: 10px; font-weight: bold; color: var(--ana-renk); display: flex; justify-content: space-between; }
         .kart { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-top: 1px solid #2c2c2c; }
-        .teslim-btn { background: var(--onay-renk); color: white; border: none; padding: 8px 12px; border-radius: 6px; }
+        .teslim-btn { background: var(--onay-renk); color: white; border: none; padding: 8px 12px; border-radius: 6px; font-weight: bold; }
 
-        #ozetModal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:100; padding:20px; box-sizing:border-box; }
-        .modal-icerik { background:#222; padding:20px; border-radius:15px; max-height:80%; overflow-y:auto; border:1px solid var(--ana-renk); }
+        #ozetModal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:100; padding:15px; box-sizing:border-box; }
+        .modal-icerik { background:#1a1a1a; padding:20px; border-radius:15px; max-height:90%; overflow-y:auto; border:1px solid var(--ana-renk); }
     </style>
 </head>
 <body>
@@ -45,13 +49,15 @@
         </select>
 
         <div id="masaDurum"></div>
-        <div class="urun-grid" id="urunler"></div>
+
+        <div id="kategoriAlanlari">
+            </div>
 
         <button class="aksiyon-btn kaydet" onclick="kaydet()">Siparişi Kaydet / Güncelle ➕</button>
-        <button class="aksiyon-btn" style="background:#555; font-size:12px; padding:8px" onclick="tempSifirla()">Girişi Temizle</button>
+        <button class="aksiyon-btn" style="background:#444; font-size:12px; padding:10px" onclick="tempSifirla()">Seçimleri Temizle</button>
     </div>
 
-    <h3 style="text-align:center">🚀 DAĞITILACAKLAR</h3>
+    <h3 style="text-align:center; color:#888;">🚀 DAĞITILACAKLAR</h3>
     <div id="dagitim"></div>
 
     <button class="aksiyon-btn sifirla-btn" onclick="tumSistemiResetle()">⚠️ TÜM SİSTEMİ SIFIRLA</button>
@@ -66,33 +72,44 @@
     </div>
 
 <script>
-    const urunList = ["Lahmacun Menü", "Tavuk Şiş Menü", "Beyti Menü", "Adana Menü", "Kıymalı Pide", "Kaşarlı Pide", "Kuşbaşılı Pide", "Kuşbaşı Kaşarlı Pide", "Karışık Pide"];
+    // MENÜ YAPISI
+    const Menu = {
+        "LAHMACUNLAR": ["Acılı Lahmacun", "Acısız Lahmacun"],
+        "PİDELER": ["Kıymalı Pide", "Kıymalı Kaşarlı Pide", "Kuşbaşılı Pide", "Kuşbaşı Kaşarlı Pide", "Karışık Pide", "Kaşarlı Pide", "Sucuklu Kaşarlı Pide"],
+        "KEBAPLAR": ["Tavuk Şiş Menü", "Adana Menü", "Urfa Menü", "Beyti Menü", "Tavuk Kanat", "Karışık Izgara", "Köfte Porsiyon"],
+        "İÇECEKLER": ["Coca Cola", "Fanta", "Sprite", "Büyük Ayran"]
+    };
+
+    // Tüm ürünlerin tek bir listede hali (sistem kontrolleri için)
+    const urunList = Object.values(Menu).flat();
+    
     const OzelMasalar = ["Personel Masası", "Fırın Yanı", "Yeni Masa", "Şark Köşesi"];
     let temp = {};
 
     function init() {
+        // Masaları doldur
         const select = document.getElementById("masaSelect");
         for(let i=1; i<=15; i++) {
-            let opt = document.createElement("option");
-            opt.value = "Masa " + i;
-            opt.innerText = "Masa " + i;
-            select.appendChild(opt);
+            select.innerHTML += `<option value="Masa ${i}">Masa ${i}</option>`;
         }
         OzelMasalar.forEach(m => {
-            let opt = document.createElement("option");
-            opt.value = m;
-            opt.innerText = m;
-            select.appendChild(opt);
+            select.innerHTML += `<option value="${m}">${m}</option>`;
         });
 
-        const urunDiv = document.getElementById("urunler");
-        urunList.forEach(u => {
-            urunDiv.innerHTML += `
-                <button class="urun-btn" onclick="adetArt('${u}')" oncontextmenu="event.preventDefault(); adetAzalt('${u}')">
-                    ${u}
-                    <span class="badge" id="badge-${idYap(u)}" style="display:none">0</span>
-                </button>`;
-        });
+        // Kategorileri ve ürünleri oluştur
+        const katAlan = document.getElementById("kategoriAlanlari");
+        for(let kat in Menu) {
+            let html = `<div class="kat-baslik">${kat}</div><div class="urun-grid">`;
+            Menu[kat].forEach(u => {
+                html += `
+                    <button class="urun-btn" onclick="adetArt('${u}')" oncontextmenu="event.preventDefault(); adetAzalt('${u}')">
+                        ${u}
+                        <span class="badge" id="badge-${idYap(u)}" style="display:none">0</span>
+                    </button>`;
+            });
+            html += `</div>`;
+            katAlan.innerHTML += html;
+        }
         dagitimGoster();
     }
 
@@ -108,7 +125,7 @@
 
         if(mevcut) {
             let liste = Object.entries(mevcut).map(([u, a]) => `<b>${a}</b> ${u}`).join(", ");
-            durumDiv.innerHTML = `📍 <b>${masaKey} Güncel:</b> ${liste}`;
+            durumDiv.innerHTML = `📍 <b>${masaKey} İçindekiler:</b> <br>${liste}`;
             durumDiv.style.display = "block";
         } else {
             durumDiv.innerHTML = `📍 <b>${masaKey}</b> şu an boş.`;
@@ -132,11 +149,13 @@
     function arayuzGuncelle() {
         urunList.forEach(u => {
             const b = document.getElementById("badge-" + idYap(u));
-            if(temp[u]) {
-                b.innerText = temp[u];
-                b.style.display = "block";
-            } else {
-                b.style.display = "none";
+            if(b) {
+                if(temp[u]) {
+                    b.innerText = temp[u];
+                    b.style.display = "block";
+                } else {
+                    b.style.display = "none";
+                }
             }
         });
     }
@@ -151,7 +170,7 @@
         if(!masaKey) return alert("Masa seçmedin!");
         
         const secilenler = Object.entries(temp);
-        if(secilenler.length === 0) return alert("Ürün eklemedin!");
+        if(secilenler.length === 0) return alert("Ürün seçmedin!");
 
         let db = JSON.parse(localStorage.getItem("siparisler") || "{}");
         if(!db[masaKey]) db[masaKey] = {};
@@ -171,7 +190,6 @@
         let toplamlar = {};
         let genelAdet = 0;
 
-        // Sadece urunList içindeki gerçek yemekleri sayıyoruz
         for(let m in db) {
             for(let u in db[m]) {
                 if(urunList.includes(u)) {
@@ -183,16 +201,16 @@
 
         let html = "";
         Object.keys(toplamlar).sort().forEach(urun => {
-            html += `<div style="padding:12px; border-bottom:1px solid #444; display:flex; justify-content:space-between; font-size:16px;">
+            html += `<div style="padding:12px; border-bottom:1px solid #333; display:flex; justify-content:space-between; font-size:16px;">
                         <span>${urun}</span> <span style="color:var(--ana-renk); font-weight:bold">${toplamlar[urun]} Adet</span>
                      </div>`;
         });
 
-        document.getElementById("ozetListe").innerHTML = html || "<p style='text-align:center'>Bekleyen yemek siparişi yok.</p>";
+        document.getElementById("ozetListe").innerHTML = html || "<p style='text-align:center'>Bekleyen sipariş yok.</p>";
         
         const wpBtn = document.getElementById("wpSendBtn");
         if(genelAdet > 0) {
-            document.getElementById("ozetListe").innerHTML += `<h3 style="text-align:center; color:var(--onay-renk); margin-top:15px;">TOPLAM: ${genelAdet} ÜRÜN</h3>`;
+            document.getElementById("ozetListe").innerHTML += `<h3 style="text-align:center; color:var(--onay-renk); margin-top:15px;">TOPLAM SİPARİŞ: ${genelAdet}</h3>`;
             wpBtn.style.display = "block";
         } else {
             wpBtn.style.display = "none";
@@ -203,7 +221,7 @@
 
     function whatsappGonder() {
         let db = JSON.parse(localStorage.getItem("siparisler") || "{}");
-        let mesaj = "*🚀 MUTFAK SİPARİŞ LİSTESİ*\n--------------------------\n";
+        let mesaj = "*🚀 DİVAN RESTORAN MUTFAK LİSTESİ*\n--------------------------\n";
         let toplamlar = {};
 
         for(let m in db) {
@@ -219,7 +237,7 @@
             }
         }
 
-        mesaj += "\n\n*📊 GENEL TOPLAM:*";
+        mesaj += "\n\n*📊 GENEL HAZIRLANACAK TOPLAM:*";
         for(let u in toplamlar) {
             mesaj += `\n- ${u}: ${toplamlar[u]} Adet`;
         }
@@ -234,6 +252,7 @@
         const dagitimDiv = document.getElementById("dagitim");
         dagitimDiv.innerHTML = "";
 
+        // Dağıtımı ürün ürün göster
         urunList.forEach(urun => {
             let urunGrubuHtml = "";
             let toplamUrun = 0;
@@ -272,7 +291,7 @@
     }
 
     function tumSistemiResetle() {
-        if(confirm("TÜM SİSTEMİ SIFIRLA?")) {
+        if(confirm("TÜM SİSTEMİ SIFIRLA? \n(Günün tüm verileri silinir!)")) {
             localStorage.clear();
             tempSifirla();
             document.getElementById("masaSelect").selectedIndex = 0;
@@ -285,4 +304,5 @@
 </script>
 </body>
 </html>
+
 
