@@ -3,58 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Divan Restoran v10</title>
+    <title>Divan Restoran v11 - Mobil Uyumlu</title>
     <style>
         :root { --ana-renk: #e67e22; --sil-renk: #e74c3c; --onay-renk: #27ae60; --wp-renk: #25d366; --rez-renk: #9b59b6; --arka-plan: #0f0f0f; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--arka-plan); color: #fff; margin: 0; height: 100vh; overflow: hidden; }
         
-        .main-container { display: grid; grid-template-columns: 260px 1fr 320px; height: 100vh; gap: 10px; padding: 10px; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--arka-plan); color: #fff; margin: 0; padding: 0; height: 100vh; overflow: hidden; }
+        
+        /* ANA CONTAINER: Bilgisayarda 3 sütun, Mobilde Tek Sütun */
+        .main-container { 
+            display: grid; 
+            grid-template-columns: 260px 1fr 320px; 
+            height: 100vh; 
+            gap: 10px; 
+            padding: 10px; 
+            box-sizing: border-box; 
+        }
+
+        /* TELEFON İÇİN ÖZEL AYARLAR */
+        @media (max-width: 900px) {
+            body { overflow-y: auto; height: auto; }
+            .main-container { 
+                display: flex; 
+                flex-direction: column; 
+                height: auto; 
+                padding: 5px;
+                gap: 15px;
+            }
+            .column { 
+                height: 500px; /* Mobilde her bölümün yüksekliği */
+                flex: none; 
+            }
+            .urun-grid {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)) !important;
+            }
+        }
+
         .column { background: #1a1a1a; border-radius: 10px; border: 1px solid #333; display: flex; flex-direction: column; overflow: hidden; }
-        .column-header { background: #252525; padding: 10px; text-align: center; color: var(--ana-renk); font-weight: bold; font-size: 14px; border-bottom: 1px solid #333; }
+        .column-header { background: #252525; padding: 12px; text-align: center; color: var(--ana-renk); font-weight: bold; font-size: 14px; border-bottom: 1px solid #333; }
         .scroll-area { flex: 1; overflow-y: auto; padding: 10px; }
 
-        select { width: 100%; padding: 12px; background: #2c2c2c; color: #fff; border: 1px solid var(--ana-renk); border-radius: 5px; font-size: 14px; outline: none; }
-        #masaDurum { margin-top: 10px; font-size: 12px; color: #ccc; background: #252a2b; padding: 8px; border-radius: 5px; border-left: 3px solid #f1c40f; line-height: 1.5; }
-        .rez-bilgi { color: var(--rez-renk); font-weight: bold; margin-bottom: 5px; display: block; }
+        select { width: 100%; padding: 15px; background: #2c2c2c; color: #fff; border: 1px solid var(--ana-renk); border-radius: 5px; font-size: 16px; outline: none; }
+        #masaDurum { margin-top: 10px; font-size: 14px; color: #ccc; background: #252a2b; padding: 12px; border-radius: 5px; border-left: 4px solid #f1c40f; line-height: 1.6; }
+        .rez-bilgi { color: var(--rez-renk); font-weight: bold; margin-bottom: 5px; display: block; border-bottom: 1px solid #333; padding-bottom: 5px; }
 
-        .kat-baslik { font-size: 11px; color: #888; margin: 10px 0 5px 0; text-transform: uppercase; border-bottom: 1px solid #222; }
-        .urun-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 6px; }
-        .urun-btn { background: #252525; color: #eee; border: 1px solid #3a3a3a; padding: 8px 4px; border-radius: 4px; font-size: 11px; position: relative; cursor: pointer; height: 45px; display: flex; align-items: center; justify-content: center; text-align: center; }
-        .badge { position: absolute; top: -5px; right: -5px; background: var(--onay-renk); border-radius: 10px; padding: 1px 5px; font-size: 10px; font-weight: bold; }
+        .kat-baslik { font-size: 12px; color: #888; margin: 15px 0 8px 0; text-transform: uppercase; border-bottom: 1px solid #222; letter-spacing: 1px; }
+        .urun-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(115px, 1fr)); gap: 8px; }
+        .urun-btn { background: #252525; color: #eee; border: 1px solid #3a3a3a; padding: 10px 5px; border-radius: 6px; font-size: 12px; position: relative; cursor: pointer; min-height: 50px; display: flex; align-items: center; justify-content: center; text-align: center; font-weight: 500; }
+        .urun-btn:active { background: #e67e22; color: white; }
+        .badge { position: absolute; top: -8px; right: -8px; background: var(--onay-renk); border-radius: 12px; padding: 2px 7px; font-size: 11px; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.5); }
 
-        .footer-btns { padding: 10px; display: flex; flex-direction: column; gap: 5px; border-top: 1px solid #333; }
-        .aksiyon-btn { border: none; padding: 10px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 13px; color: white; }
+        .footer-btns { padding: 10px; display: flex; flex-direction: column; gap: 8px; border-top: 1px solid #333; background: #1a1a1a; }
+        .aksiyon-btn { border: none; padding: 14px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 14px; color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
         .kaydet { background: var(--ana-renk); }
         .rez-btn { background: var(--rez-renk); }
 
-        .dagitim-grup { background: #222; margin-bottom: 8px; border-radius: 5px; border: 1px solid #333; }
-        .urun-baslik { background: #2a2a2a; padding: 5px 8px; font-size: 12px; font-weight: bold; color: var(--ana-renk); display: flex; justify-content: space-between; }
-        .kart { display: flex; justify-content: space-between; align-items: center; padding: 6px 8px; font-size: 11px; border-top: 1px solid #333; }
-        .teslim-btn { background: var(--onay-renk); color: white; border: none; padding: 4px 8px; border-radius: 3px; font-size: 10px; }
+        .dagitim-grup { background: #222; margin-bottom: 10px; border-radius: 6px; border: 1px solid #333; }
+        .urun-baslik { background: #2a2a2a; padding: 8px 12px; font-size: 13px; font-weight: bold; color: var(--ana-renk); display: flex; justify-content: space-between; border-radius: 6px 6px 0 0; }
+        .kart { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; font-size: 13px; border-top: 1px solid #333; }
+        .teslim-btn { background: var(--onay-renk); color: white; border: none; padding: 8px 15px; border-radius: 4px; font-size: 12px; font-weight: bold; }
 
-        /* Modallar */
-        .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:200; padding:20px; box-sizing: border-box; }
-        .modal-icerik { background:#1a1a1a; padding:20px; border-radius:10px; max-width:450px; margin:50px auto; border:1px solid var(--ana-renk); }
-        
-        /* Arama Çubuğu Tasarımı */
-        .arama-kutusu { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 5px; border: 1px solid var(--rez-renk); background: #2c2c2c; color: white; font-size: 14px; box-sizing: border-box; }
-        .rez-kart { background: #252525; padding: 10px; border-radius: 5px; margin-bottom: 8px; border-left: 4px solid var(--rez-renk); display: flex; justify-content: space-between; align-items: center; }
+        /* Modal Tasarımları */
+        .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:999; padding:15px; box-sizing: border-box; }
+        .modal-icerik { background:#1a1a1a; padding:20px; border-radius:10px; max-width:450px; margin:20px auto; border:1px solid var(--ana-renk); }
+        .arama-kutusu { width: 100%; padding: 15px; margin-bottom: 15px; border-radius: 5px; border: 1px solid var(--rez-renk); background: #2c2c2c; color: white; font-size: 16px; box-sizing: border-box; }
+        .rez-kart { background: #252525; padding: 12px; border-radius: 6px; margin-bottom: 10px; border-left: 5px solid var(--rez-renk); display: flex; justify-content: space-between; align-items: center; }
     </style>
 </head>
 <body>
 
 <div class="main-container">
     <div class="column">
-        <div class="column-header">📍 MASA YÖNETİMİ</div>
+        <div class="column-header">📍 MASA VE REZERVASYON</div>
         <div class="scroll-area">
             <select id="masaSelect" onchange="masaDegisti()">
                 <option value="">Masa Seçiniz...</option>
             </select>
-            <div id="masaDurum">Lütfen masa seçin...</div>
+            <div id="masaDurum">Lütfen işlem yapacağınız masayı seçin.</div>
         </div>
         <div class="footer-btns">
             <button class="aksiyon-btn rez-btn" onclick="rezervasyonAc()">📅 REZERVASYON YAP</button>
-            <button class="aksiyon-btn" style="background:#555" onclick="rezListesiAc()">🔍 REZERVASYON ARA/LİSTELE</button>
+            <button class="aksiyon-btn" style="background:#555" onclick="rezListesiAc()">🔍 REZERVASYON ARA</button>
             <button class="aksiyon-btn" style="background:#3498db" onclick="ozetGoster()">📊 MUTFAK ÖZETİ</button>
         </div>
     </div>
@@ -63,8 +91,8 @@
         <div class="column-header">🍴 ÜRÜN MENÜSÜ</div>
         <div class="scroll-area" id="kategoriAlanlari"></div>
         <div class="footer-btns">
-            <button class="aksiyon-btn kaydet" onclick="kaydet()">SİPARİŞİ KAYDET / GÜNCELLE ➕</button>
-            <button class="aksiyon-btn" style="background:#444; font-size:11px;" onclick="tempSifirla()">SEÇİMLERİ TEMİZLE</button>
+            <button class="aksiyon-btn kaydet" onclick="kaydet()">SİPARİŞİ KAYDET / EKLE ➕</button>
+            <button class="aksiyon-btn" style="background:#444; font-size:12px;" onclick="tempSifirla()">SEÇİMLERİ TEMİZLE</button>
         </div>
     </div>
 
@@ -72,37 +100,35 @@
         <div class="column-header">🚀 DAĞITILACAKLAR</div>
         <div class="scroll-area" id="dagitim"></div>
         <div class="footer-btns">
-            <button class="aksiyon-btn" style="background:#c0392b; font-size:10px;" onclick="tumSistemiResetle()">⚠️ SİSTEMİ SIFIRLA</button>
+            <button class="aksiyon-btn" style="background:#c0392b; font-size:11px;" onclick="tumSistemiResetle()">⚠️ TÜMÜNÜ SIFIRLA</button>
         </div>
     </div>
 </div>
 
 <div id="rezModal" class="modal">
     <div class="modal-icerik">
-        <h3 id="rezMasaBaslik">Rezervasyon</h3>
-        <input type="text" id="rezIsim" placeholder="Müşteri Adı Soyadı" style="width:100%; padding:12px; margin-bottom:10px; box-sizing:border-box; background:#2c2c2c; color:white; border:1px solid #444;">
+        <h3 id="rezMasaBaslik" style="margin-top:0; color:var(--rez-renk)">Rezervasyon</h3>
+        <input type="text" id="rezIsim" placeholder="Müşteri Adı Soyadı" style="width:100%; padding:15px; margin-bottom:15px; box-sizing:border-box; background:#2c2c2c; color:white; border:1px solid #444; border-radius:5px; font-size:16px;">
         <button class="aksiyon-btn rez-btn" style="width:100%" onclick="rezervasyonKaydet()">KAYDET</button>
-        <button class="aksiyon-btn" style="width:100%; background:#444; margin-top:5px;" onclick="modalKapat('rezModal')">İPTAL</button>
+        <button class="aksiyon-btn" style="width:100%; background:#444; margin-top:10px;" onclick="modalKapat('rezModal')">İPTAL</button>
     </div>
 </div>
 
 <div id="rezListModal" class="modal">
     <div class="modal-icerik">
         <h3 style="color:var(--rez-renk); margin-top:0;">🔍 Rezervasyon Arama</h3>
-        <input type="text" id="rezAramaInput" class="arama-kutusu" placeholder="İsim yazmaya başlayın..." onkeyup="rezAramaYap()">
-        
-        <div id="rezListesi" style="max-height:350px; overflow-y:auto;">
-            </div>
-        <button class="aksiyon-btn" style="width:100%; background:#444; margin-top:10px;" onclick="modalKapat('rezListModal')">KAPAT</button>
+        <input type="text" id="rezAramaInput" class="arama-kutusu" placeholder="İsim ile ara..." onkeyup="rezAramaYap()">
+        <div id="rezListesi" style="max-height:400px; overflow-y:auto;"></div>
+        <button class="aksiyon-btn" style="width:100%; background:#444; margin-top:15px;" onclick="modalKapat('rezListModal')">KAPAT</button>
     </div>
 </div>
 
 <div id="ozetModal" class="modal">
     <div class="modal-icerik">
-        <h3>📊 Mutfak Toplam</h3>
-        <div id="ozetListe"></div>
+        <h3 style="margin-top:0; color:#3498db">📊 Mutfak Toplam</h3>
+        <div id="ozetListe" style="margin-bottom:15px;"></div>
         <button class="aksiyon-btn" style="background:var(--wp-renk); width:100%; margin-top:10px;" onclick="whatsappGonder()">WhatsApp'a At ✅</button>
-        <button class="aksiyon-btn" style="background:#444; width:100%; margin-top:5px;" onclick="modalKapat('ozetModal')">Kapat</button>
+        <button class="aksiyon-btn" style="background:#444; width:100%; margin-top:10px;" onclick="modalKapat('ozetModal')">Kapat</button>
     </div>
 </div>
 
@@ -151,59 +177,45 @@
     function masaDegisti() {
         const mKey = document.getElementById("masaSelect").value;
         const dDiv = document.getElementById("masaDurum");
-        if(!mKey) { dDiv.innerHTML = "Lütfen masa seçin..."; return; }
+        if(!mKey) { dDiv.innerHTML = "Lütfen işlem yapılacak masayı seçin."; return; }
         let db = JSON.parse(localStorage.getItem("siparisler") || "{}");
         let rezler = JSON.parse(localStorage.getItem("rezervasyonlar") || "{}");
         let html = rezler[mKey] ? `<span class="rez-bilgi">👤 REZERVE: ${rezler[mKey]}</span>` : "";
-        html += db[mKey] ? `<b>📍 Siparişler:</b><br>` + Object.entries(db[mKey]).map(([u, a]) => `${a}x ${u}`).join("<br>") : `<b>${mKey}</b> boş.`;
+        html += db[mKey] ? `<b>📍 Siparişler:</b><br>` + Object.entries(db[mKey]).map(([u, a]) => `${a}x ${u}`).join("<br>") : `<b>${mKey}</b> masası boş.`;
         dDiv.innerHTML = html;
     }
 
     function rezListesiAc() {
-        document.getElementById("rezAramaInput").value = ""; // Arama kutusunu temizle
-        rezAramaYap(); // Listeyi yükle
+        document.getElementById("rezAramaInput").value = "";
+        rezAramaYap();
         document.getElementById("rezListModal").style.display = "block";
     }
 
-    // ARAMA FONKSİYONU
     function rezAramaYap() {
         const aramaKelimesi = document.getElementById("rezAramaInput").value.toLowerCase();
         const rezler = JSON.parse(localStorage.getItem("rezervasyonlar") || "{}");
         const listeDiv = document.getElementById("rezListesi");
         listeDiv.innerHTML = "";
-        
-        let bulunanVarmi = false;
-
+        let varMi = false;
         for(let m in rezler) {
-            const isim = rezler[m].toLowerCase();
-            // Eğer isim aranan kelimeyi içeriyorsa göster
-            if(isim.includes(aramaKelimesi)) {
-                bulunanVarmi = true;
-                listeDiv.innerHTML += `
-                    <div class="rez-kart">
-                        <div><b>${m}</b><br><small>${rezler[m]}</small></div>
-                        <button class="teslim-btn" style="background:var(--sil-renk)" onclick="rezSil('${m}')">GELDİ/SİL</button>
-                    </div>`;
+            if(rezler[m].toLowerCase().includes(aramaKelimesi)) {
+                varMi = true;
+                listeDiv.innerHTML += `<div class="rez-kart"><div><b>${m}</b><br><small>${rezler[m]}</small></div><button class="teslim-btn" style="background:var(--sil-renk)" onclick="rezSil('${m}')">SİL</button></div>`;
             }
         }
-
-        if(!bulunanVarmi) {
-            listeDiv.innerHTML = "<p style='text-align:center; color:#888;'>Eşleşen rezervasyon bulunamadı.</p>";
-        }
+        if(!varMi) listeDiv.innerHTML = "<p style='text-align:center; color:#888;'>Kayıt bulunamadı.</p>";
     }
 
     function rezSil(m) {
         let rezler = JSON.parse(localStorage.getItem("rezervasyonlar") || "{}");
         delete rezler[m];
         localStorage.setItem("rezervasyonlar", JSON.stringify(rezler));
-        rezAramaYap(); // Listeyi güncelle
-        masaListesiniGuncelle();
-        masaDegisti();
+        rezAramaYap(); masaListesiniGuncelle(); masaDegisti();
     }
 
     function rezervasyonAc() {
         const mKey = document.getElementById("masaSelect").value;
-        if(!mKey) return alert("Masa seçmedin!");
+        if(!mKey) return alert("Önce masa seç kanka!");
         document.getElementById("rezMasaBaslik").innerText = mKey + " Rezervasyon";
         document.getElementById("rezModal").style.display = "block";
     }
@@ -211,30 +223,30 @@
     function rezervasyonKaydet() {
         const mKey = document.getElementById("masaSelect").value;
         const isim = document.getElementById("rezIsim").value;
-        if(!isim) return alert("İsim yazmadın!");
+        if(!isim) return alert("İsim yaz!");
         let rezler = JSON.parse(localStorage.getItem("rezervasyonlar") || "{}");
         rezler[mKey] = isim;
         localStorage.setItem("rezervasyonlar", JSON.stringify(rezler));
         document.getElementById("rezIsim").value = "";
         modalKapat('rezModal');
-        masaListesiniGuncelle();
-        masaDegisti();
+        masaListesiniGuncelle(); masaDegisti();
     }
 
-    // Standart Fonksiyonlar
     function adetArt(u) { temp[u] = (temp[u] || 0) + 1; arayuzGuncelle(); }
     function adetAzalt(u) { if(temp[u] > 0) { temp[u]--; if(temp[u] === 0) delete temp[u]; arayuzGuncelle(); } }
     function arayuzGuncelle() { urunList.forEach(u => { const b = document.getElementById("badge-" + idYap(u)); if(b) { b.innerText = temp[u] || 0; b.style.display = temp[u] ? "block" : "none"; } }); }
     function tempSifirla() { temp = {}; arayuzGuncelle(); }
+    
     function kaydet() {
         const mKey = document.getElementById("masaSelect").value;
-        if(!mKey || Object.keys(temp).length === 0) return alert("Hata!");
+        if(!mKey || Object.keys(temp).length === 0) return alert("Masa veya ürün eksik!");
         let db = JSON.parse(localStorage.getItem("siparisler") || "{}");
         if(!db[mKey]) db[mKey] = {};
         Object.entries(temp).forEach(([u, a]) => db[mKey][u] = (db[mKey][u] || 0) + a);
         localStorage.setItem("siparisler", JSON.stringify(db));
         tempSifirla(); masaDegisti(); dagitimGoster();
     }
+
     function dagitimGoster() {
         const db = JSON.parse(localStorage.getItem("siparisler") || "{}");
         const dDiv = document.getElementById("dagitim"); dDiv.innerHTML = "";
@@ -244,29 +256,32 @@
             if(t > 0) dDiv.innerHTML += `<div class="dagitim-grup"><div class="urun-baslik"><span>${u}</span><span>${t}</span></div>${html}</div>`;
         });
     }
+
     function teslim(m, u) {
         let db = JSON.parse(localStorage.getItem("siparisler") || "{}");
         db[m][u]--; if(db[m][u] <= 0) delete db[m][u]; if(Object.keys(db[m]).length === 0) delete db[m];
         localStorage.setItem("siparisler", JSON.stringify(db)); dagitimGoster(); masaDegisti();
     }
+
     function ozetGoster() {
         let db = JSON.parse(localStorage.getItem("siparisler") || "{}"), t = {};
         for(let m in db) for(let u in db[m]) t[u] = (t[u] || 0) + db[m][u];
-        document.getElementById("ozetListe").innerHTML = Object.entries(t).map(([u, a]) => `<div style="display:flex; justify-content:space-between; border-bottom:1px solid #333; padding:8px;"><span>${u}</span><b>${a}</b></div>`).join("") || "Sipariş yok.";
+        document.getElementById("ozetListe").innerHTML = Object.entries(t).map(([u, a]) => `<div style="display:flex; justify-content:space-between; border-bottom:1px solid #333; padding:10px;"><span>${u}</span><b>${a}</b></div>`).join("") || "Sipariş yok.";
         document.getElementById("ozetModal").style.display = "block";
     }
+
     function whatsappGonder() {
         let db = JSON.parse(localStorage.getItem("siparisler") || "{}"), m = "*🚀 DİVAN MUTFAK*\n", t = {};
         for(let ms in db) {
-            let satır = [];
-            for(let ur in db[ms]) { satır.push(`${db[ms][ur]}x ${ur}`); t[ur] = (t[ur] || 0) + db[ms][ur]; }
-            if(satır.length) m += `\n*${ms}:* ${satır.join(", ")}`;
+            let s = []; for(let ur in db[ms]) { s.push(`${db[ms][ur]}x ${ur}`); t[ur] = (t[ur] || 0) + db[ms][ur]; }
+            if(s.length) m += `\n*${ms}:* ${s.join(", ")}`;
         }
         m += "\n\n*TOPLAM:* " + Object.entries(t).map(([u, a]) => `\n- ${u}: ${a}`).join("");
         window.open(`https://wa.me/?text=${encodeURIComponent(m)}`, '_blank');
     }
+
     function modalKapat(id) { document.getElementById(id).style.display = "none"; }
-    function tumSistemiResetle() { if(confirm("Her şey silinsin mi?")) { localStorage.clear(); location.reload(); } }
+    function tumSistemiResetle() { if(confirm("Her şey silinecek, emin misin?")) { localStorage.clear(); location.reload(); } }
 
     init();
 </script>
