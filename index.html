@@ -2,8 +2,8 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Divan Restoran v12 - Operasyon Modu</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Divan Garson v13</title>
     <style>
         :root { 
             --ana-renk: #e67e22; 
@@ -11,92 +11,92 @@
             --mutfakta-renk: #d35400; 
             --hazir-renk: #27ae60; 
             --gecikme-renk: #c0392b;
-            --arka-plan: #0f0f0f; 
+            --arka-plan: #000; 
         }
         
-        body { font-family: 'Segoe UI', sans-serif; background: var(--arka-plan); color: #fff; margin: 0; padding: 10px; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--arka-plan); color: #fff; margin: 0; padding: 10px; overflow-x: hidden; }
         
-        /* MASA HARİTASI */
+        /* MOBİL MASA GRID: Yan yana 3 masa */
         .masa-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-            gap: 15px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
             margin-bottom: 20px;
         }
 
         .masa-kart {
-            height: 120px;
-            border-radius: 12px;
+            height: 90px;
+            border-radius: 10px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: 0.3s;
-            position: relative;
-            border: 2px solid rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.1);
             background: var(--bos-renk);
+            text-align: center;
         }
 
-        .masa-kart.dolu { background: var(--mutfakta-renk); animation: pulse 2s infinite; }
-        .masa-kart.hazir { background: var(--hazir-renk); box-shadow: 0 0 20px var(--hazir-renk); }
+        .masa-kart.dolu { background: var(--mutfakta-renk); }
+        .masa-kart.hazir { background: var(--hazir-renk); box-shadow: 0 0 15px var(--hazir-renk); }
         .masa-kart.gecikmis { background: var(--gecikme-renk); animation: shake 0.5s infinite; }
 
-        .masa-no { font-size: 20px; font-weight: bold; }
-        .masa-sure { font-size: 12px; margin-top: 5px; opacity: 0.8; }
+        .masa-no { font-size: 16px; font-weight: bold; }
+        .masa-sure { font-size: 10px; margin-top: 4px; opacity: 0.7; }
 
-        /* SİPARİŞ PANELİ (MODAL GİBİ) */
+        /* NOT DEFTERİ PANELİ */
         .siparis-panel {
-            position: fixed; bottom: 0; left: 0; width: 100%; height: 80%;
-            background: #1a1a1a; border-top: 3px solid var(--ana-renk);
-            border-radius: 20px 20px 0 0; display: none; flex-direction: column; z-index: 100;
+            position: fixed; top: 10%; left: 5%; width: 90%; height: auto;
+            background: #1a1a1a; border: 2px solid var(--ana-renk);
+            border-radius: 15px; display: none; flex-direction: column; z-index: 1000;
+            padding: 15px; box-sizing: border-box;
         }
 
-        .urun-listesi { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 15px; overflow-y: auto; }
-        .urun-item { background: #252525; padding: 15px; border-radius: 8px; text-align: center; border: 1px solid #333; }
-        .urun-item:active { background: var(--ana-renk); }
+        .not-alani {
+            width: 100%; height: 150px; background: #333; color: #fff;
+            border: 1px solid #444; border-radius: 8px; padding: 10px;
+            font-size: 18px; margin-bottom: 15px; box-sizing: border-box;
+            resize: none;
+        }
 
-        .alt-menu { padding: 20px; display: flex; gap: 10px; background: #111; }
-        .btn { flex: 1; padding: 15px; border-radius: 8px; border: none; font-weight: bold; color: white; cursor: pointer; }
+        .btn-grup { display: flex; gap: 10px; }
+        .btn { flex: 1; padding: 15px; border-radius: 8px; border: none; font-weight: bold; color: white; font-size: 14px; }
 
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.8; } 100% { opacity: 1; } }
-        @keyframes shake { 0% { transform: translateX(0); } 25% { transform: translateX(3px); } 50% { transform: translateX(-3px); } 100% { transform: translateX(0); } }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(2px); } 75% { transform: translateX(-2px); } }
 
-        .header { text-align: center; padding: 10px; color: var(--ana-renk); font-weight: bold; font-size: 20px; }
-        .ozet-alan { background: #1a1a1a; padding: 10px; border-radius: 10px; margin-top: 10px; }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; z-index: 999; }
+        .header { text-align: center; padding: 5px 0 15px 0; color: var(--ana-renk); font-weight: bold; }
     </style>
 </head>
 <body>
 
-<div class="header">🚀 DİVAN OPERASYON MERKEZİ</div>
+<div class="header">📋 DİVAN NOT DEFTERİ MODU</div>
 
 <div id="masaHaritasi" class="masa-grid"></div>
 
-<div class="ozet-alan">
-    <h3 style="margin-top:0; color:var(--ana-renk)">🔥 Mutfak Durumu</h3>
-    <div id="mutfakListesi">Henüz bekleyen sipariş yok.</div>
-</div>
+<div id="overlay" class="overlay" onclick="panelKapat()"></div>
 
 <div id="siparisPanel" class="siparis-panel">
-    <div class="header" id="panelMasaBaslik">MASA X - SİPARİŞ AL</div>
-    <div class="urun-listesi" id="menuAlan"></div>
-    <div class="alt-menu">
+    <h3 id="panelBaslik" style="margin-top:0; color:var(--ana-renk)">Masa X</h3>
+    <textarea id="siparisNotu" class="not-alani" placeholder="Siparişi buraya yaz kanka..."></textarea>
+    <div class="btn-grup">
         <button class="btn" style="background:#555" onclick="panelKapat()">İPTAL</button>
-        <button class="btn" style="background:var(--ana-renk)" onclick="mutfagaGonder()">USTAYA GÖNDER 👨‍🍳</button>
+        <button class="btn" style="background:var(--ana-renk)" onclick="notuKaydet()">KAYDET ✅</button>
     </div>
 </div>
 
 <script>
-    const Masalar = ["Masa 1", "Masa 2", "Masa 3", "Masa 4", "Masa 5", "Masa 6", "Masa 7", "Masa 8", "Personel", "VİP"];
-    const Menu = ["Acılı Lahmacun", "Kıymalı Pide", "Kuşbaşılı", "Adana Menü", "Tavuk Şiş", "Ayran", "Kola"];
+    // 1-13 arası masalar + Personel
+    const Masalar = [];
+    for(let i=1; i<=13; i++) Masalar.push("Masa " + i);
+    Masalar.push("Personel");
     
-    let aktifSiparisler = JSON.parse(localStorage.getItem("divan_v12_aktif")) || {};
+    let aktifSiparisler = JSON.parse(localStorage.getItem("divan_v13_notlar")) || {};
     let seciliMasa = null;
-    let tempSepet = {};
 
     function init() {
         haritaCiz();
-        setInterval(sureGuncelle, 10000); // 10 saniyede bir süreleri ve renkleri kontrol et
+        setInterval(haritaCiz, 30000); // 30 saniyede bir süreleri tazele
     }
 
     function haritaCiz() {
@@ -105,67 +105,61 @@
         Masalar.forEach(m => {
             const s = aktifSiparisler[m];
             let classEk = "";
-            let sureYazisi = "Boş";
+            let altYazi = "Boş";
 
             if(s) {
                 const gecenDakika = Math.floor((new Date() - new Date(s.saat)) / 60000);
-                sureYazisi = gecenDakika + " dk önce";
-                classEk = s.durum === "hazir" ? "hazir" : (gecenDakika > 15 ? "gecikmis" : "dolu");
+                altYazi = gecenDakika + " dk / " + s.not.substring(0, 15) + "...";
+                
+                if(s.durum === "hazir") classEk = "hazir";
+                else if(gecenDakika > 20) classEk = "gecikmis";
+                else classEk = "dolu";
             }
 
             h.innerHTML += `
                 <div class="masa-kart ${classEk}" onclick="masaTikla('${m}')">
                     <div class="masa-no">${m}</div>
-                    <div class="masa-sure">${sureYazisi}</div>
+                    <div class="masa-sure">${altYazi}</div>
                 </div>
             `;
         });
-        mutfakListesiGuncelle();
     }
 
     function masaTikla(m) {
-        if (aktifSiparisler[m]) {
-            if (aktifSiparisler[m].durum === "hazir") {
-                if(confirm(m + " siparişini teslim ettin mi?")) {
-                    delete aktifSiparisler[m];
-                    kaydet();
-                }
+        seciliMasa = m;
+        const s = aktifSiparisler[m];
+
+        if (!s) {
+            // Masa Boş: Not Defterini Aç
+            document.getElementById("panelBaslik").innerText = m + " - Yeni Sipariş";
+            document.getElementById("siparisNotu").value = "";
+            panelAc();
+        } else if (s.durum === "mutfakta") {
+            // Mutfakta: Hazır mı veya Düzenle mi?
+            let islem = confirm(m + " İÇİN İŞLEM SEÇ:\n\nTAMAM: Sipariş Hazır (Yeşil Yap)\nİPTAL: Notu Düzenle");
+            if(islem) {
+                s.durum = "hazir";
+                kaydet();
             } else {
-                if(confirm(m + " siparişi HAZIR MI? (Usta bitirdi mi?)")) {
-                    aktifSiparisler[m].durum = "hazir";
-                    kaydet();
-                }
+                document.getElementById("panelBaslik").innerText = m + " - Düzenle";
+                document.getElementById("siparisNotu").value = s.not;
+                panelAc();
             }
-        } else {
-            seciliMasa = m;
-            tempSepet = {};
-            document.getElementById("panelMasaBaslik").innerText = m + " - SİPARİŞ AL";
-            menuCiz();
-            document.getElementById("siparisPanel").style.display = "flex";
+        } else if (s.durum === "hazir") {
+            // Hazır: Teslim edildi mi?
+            if(confirm(m + " teslim edildi mi? (Masa Boşalacak)")) {
+                delete aktifSiparisler[m];
+                kaydet();
+            }
         }
     }
 
-    function menuCiz() {
-        const mAlan = document.getElementById("menuAlan");
-        mAlan.innerHTML = "";
-        Menu.forEach(u => {
-            mAlan.innerHTML += `
-                <div class="urun-item" onclick="sepeteEkle('${u}')">
-                    ${u} <br> <b id="adet-${u}">${tempSepet[u] || 0}</b>
-                </div>
-            `;
-        });
-    }
-
-    function sepeteEkle(u) {
-        tempSepet[u] = (tempSepet[u] || 0) + 1;
-        document.getElementById("adet-"+u).innerText = tempSepet[u];
-    }
-
-    function mutfagaGonder() {
-        if(Object.keys(tempSepet).length === 0) return alert("Ürün seçmedin!");
+    function notuKaydet() {
+        const not = document.getElementById("siparisNotu").value;
+        if(!not.trim()) return alert("Bir şeyler yaz kanka!");
+        
         aktifSiparisler[seciliMasa] = {
-            urunler: {...tempSepet},
+            not: not,
             saat: new Date(),
             durum: "mutfakta"
         };
@@ -173,23 +167,19 @@
         panelKapat();
     }
 
-    function mutfakListesiGuncelle() {
-        const l = document.getElementById("mutfakListesi");
-        let html = "";
-        for(let m in aktifSiparisler) {
-            const s = aktifSiparisler[m];
-            const uList = Object.entries(s.urunler).map(([u, a]) => `${a}x ${u}`).join(", ");
-            html += `<div style="padding:5px 0; border-bottom:1px solid #333; color:${s.durum==='hazir'?'#27ae60':'#e67e22'}">
-                <b>${m}:</b> ${uList} <small>(${s.durum})</small>
-            </div>`;
-        }
-        l.innerHTML = html || "Bekleyen sipariş yok.";
+    function panelAc() {
+        document.getElementById("siparisPanel").style.display = "flex";
+        document.getElementById("overlay").style.display = "block";
+        document.getElementById("siparisNotu").focus();
     }
 
-    function sureGuncelle() { haritaCiz(); }
-    function panelKapat() { document.getElementById("siparisPanel").style.display = "none"; }
+    function panelKapat() {
+        document.getElementById("siparisPanel").style.display = "none";
+        document.getElementById("overlay").style.display = "none";
+    }
+
     function kaydet() {
-        localStorage.setItem("divan_v12_aktif", JSON.stringify(aktifSiparisler));
+        localStorage.setItem("divan_v13_notlar", JSON.stringify(aktifSiparisler));
         haritaCiz();
     }
 
