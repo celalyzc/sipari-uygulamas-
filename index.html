@@ -3,288 +3,197 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Divan Restoran v11 - Mobil Uyumlu</title>
+    <title>Divan Restoran v12 - Operasyon Modu</title>
     <style>
-        :root { --ana-renk: #e67e22; --sil-renk: #e74c3c; --onay-renk: #27ae60; --wp-renk: #25d366; --rez-renk: #9b59b6; --arka-plan: #0f0f0f; }
+        :root { 
+            --ana-renk: #e67e22; 
+            --bos-renk: #2c3e50; 
+            --mutfakta-renk: #d35400; 
+            --hazir-renk: #27ae60; 
+            --gecikme-renk: #c0392b;
+            --arka-plan: #0f0f0f; 
+        }
         
-        body { font-family: 'Segoe UI', sans-serif; background: var(--arka-plan); color: #fff; margin: 0; padding: 0; height: 100vh; overflow: hidden; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--arka-plan); color: #fff; margin: 0; padding: 10px; box-sizing: border-box; }
         
-        /* ANA CONTAINER: Bilgisayarda 3 sütun, Mobilde Tek Sütun */
-        .main-container { 
-            display: grid; 
-            grid-template-columns: 260px 1fr 320px; 
-            height: 100vh; 
-            gap: 10px; 
-            padding: 10px; 
-            box-sizing: border-box; 
+        /* MASA HARİTASI */
+        .masa-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
         }
 
-        /* TELEFON İÇİN ÖZEL AYARLAR */
-        @media (max-width: 900px) {
-            body { overflow-y: auto; height: auto; }
-            .main-container { 
-                display: flex; 
-                flex-direction: column; 
-                height: auto; 
-                padding: 5px;
-                gap: 15px;
-            }
-            .column { 
-                height: 500px; /* Mobilde her bölümün yüksekliği */
-                flex: none; 
-            }
-            .urun-grid {
-                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)) !important;
-            }
+        .masa-kart {
+            height: 120px;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: 0.3s;
+            position: relative;
+            border: 2px solid rgba(255,255,255,0.1);
+            background: var(--bos-renk);
         }
 
-        .column { background: #1a1a1a; border-radius: 10px; border: 1px solid #333; display: flex; flex-direction: column; overflow: hidden; }
-        .column-header { background: #252525; padding: 12px; text-align: center; color: var(--ana-renk); font-weight: bold; font-size: 14px; border-bottom: 1px solid #333; }
-        .scroll-area { flex: 1; overflow-y: auto; padding: 10px; }
+        .masa-kart.dolu { background: var(--mutfakta-renk); animation: pulse 2s infinite; }
+        .masa-kart.hazir { background: var(--hazir-renk); box-shadow: 0 0 20px var(--hazir-renk); }
+        .masa-kart.gecikmis { background: var(--gecikme-renk); animation: shake 0.5s infinite; }
 
-        select { width: 100%; padding: 15px; background: #2c2c2c; color: #fff; border: 1px solid var(--ana-renk); border-radius: 5px; font-size: 16px; outline: none; }
-        #masaDurum { margin-top: 10px; font-size: 14px; color: #ccc; background: #252a2b; padding: 12px; border-radius: 5px; border-left: 4px solid #f1c40f; line-height: 1.6; }
-        .rez-bilgi { color: var(--rez-renk); font-weight: bold; margin-bottom: 5px; display: block; border-bottom: 1px solid #333; padding-bottom: 5px; }
+        .masa-no { font-size: 20px; font-weight: bold; }
+        .masa-sure { font-size: 12px; margin-top: 5px; opacity: 0.8; }
 
-        .kat-baslik { font-size: 12px; color: #888; margin: 15px 0 8px 0; text-transform: uppercase; border-bottom: 1px solid #222; letter-spacing: 1px; }
-        .urun-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(115px, 1fr)); gap: 8px; }
-        .urun-btn { background: #252525; color: #eee; border: 1px solid #3a3a3a; padding: 10px 5px; border-radius: 6px; font-size: 12px; position: relative; cursor: pointer; min-height: 50px; display: flex; align-items: center; justify-content: center; text-align: center; font-weight: 500; }
-        .urun-btn:active { background: #e67e22; color: white; }
-        .badge { position: absolute; top: -8px; right: -8px; background: var(--onay-renk); border-radius: 12px; padding: 2px 7px; font-size: 11px; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+        /* SİPARİŞ PANELİ (MODAL GİBİ) */
+        .siparis-panel {
+            position: fixed; bottom: 0; left: 0; width: 100%; height: 80%;
+            background: #1a1a1a; border-top: 3px solid var(--ana-renk);
+            border-radius: 20px 20px 0 0; display: none; flex-direction: column; z-index: 100;
+        }
 
-        .footer-btns { padding: 10px; display: flex; flex-direction: column; gap: 8px; border-top: 1px solid #333; background: #1a1a1a; }
-        .aksiyon-btn { border: none; padding: 14px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 14px; color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
-        .kaydet { background: var(--ana-renk); }
-        .rez-btn { background: var(--rez-renk); }
+        .urun-listesi { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 15px; overflow-y: auto; }
+        .urun-item { background: #252525; padding: 15px; border-radius: 8px; text-align: center; border: 1px solid #333; }
+        .urun-item:active { background: var(--ana-renk); }
 
-        .dagitim-grup { background: #222; margin-bottom: 10px; border-radius: 6px; border: 1px solid #333; }
-        .urun-baslik { background: #2a2a2a; padding: 8px 12px; font-size: 13px; font-weight: bold; color: var(--ana-renk); display: flex; justify-content: space-between; border-radius: 6px 6px 0 0; }
-        .kart { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; font-size: 13px; border-top: 1px solid #333; }
-        .teslim-btn { background: var(--onay-renk); color: white; border: none; padding: 8px 15px; border-radius: 4px; font-size: 12px; font-weight: bold; }
+        .alt-menu { padding: 20px; display: flex; gap: 10px; background: #111; }
+        .btn { flex: 1; padding: 15px; border-radius: 8px; border: none; font-weight: bold; color: white; cursor: pointer; }
 
-        /* Modal Tasarımları */
-        .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:999; padding:15px; box-sizing: border-box; }
-        .modal-icerik { background:#1a1a1a; padding:20px; border-radius:10px; max-width:450px; margin:20px auto; border:1px solid var(--ana-renk); }
-        .arama-kutusu { width: 100%; padding: 15px; margin-bottom: 15px; border-radius: 5px; border: 1px solid var(--rez-renk); background: #2c2c2c; color: white; font-size: 16px; box-sizing: border-box; }
-        .rez-kart { background: #252525; padding: 12px; border-radius: 6px; margin-bottom: 10px; border-left: 5px solid var(--rez-renk); display: flex; justify-content: space-between; align-items: center; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.8; } 100% { opacity: 1; } }
+        @keyframes shake { 0% { transform: translateX(0); } 25% { transform: translateX(3px); } 50% { transform: translateX(-3px); } 100% { transform: translateX(0); } }
+
+        .header { text-align: center; padding: 10px; color: var(--ana-renk); font-weight: bold; font-size: 20px; }
+        .ozet-alan { background: #1a1a1a; padding: 10px; border-radius: 10px; margin-top: 10px; }
     </style>
 </head>
 <body>
 
-<div class="main-container">
-    <div class="column">
-        <div class="column-header">📍 MASA VE REZERVASYON</div>
-        <div class="scroll-area">
-            <select id="masaSelect" onchange="masaDegisti()">
-                <option value="">Masa Seçiniz...</option>
-            </select>
-            <div id="masaDurum">Lütfen işlem yapacağınız masayı seçin.</div>
-        </div>
-        <div class="footer-btns">
-            <button class="aksiyon-btn rez-btn" onclick="rezervasyonAc()">📅 REZERVASYON YAP</button>
-            <button class="aksiyon-btn" style="background:#555" onclick="rezListesiAc()">🔍 REZERVASYON ARA</button>
-            <button class="aksiyon-btn" style="background:#3498db" onclick="ozetGoster()">📊 MUTFAK ÖZETİ</button>
-        </div>
-    </div>
+<div class="header">🚀 DİVAN OPERASYON MERKEZİ</div>
 
-    <div class="column">
-        <div class="column-header">🍴 ÜRÜN MENÜSÜ</div>
-        <div class="scroll-area" id="kategoriAlanlari"></div>
-        <div class="footer-btns">
-            <button class="aksiyon-btn kaydet" onclick="kaydet()">SİPARİŞİ KAYDET / EKLE ➕</button>
-            <button class="aksiyon-btn" style="background:#444; font-size:12px;" onclick="tempSifirla()">SEÇİMLERİ TEMİZLE</button>
-        </div>
-    </div>
+<div id="masaHaritasi" class="masa-grid"></div>
 
-    <div class="column">
-        <div class="column-header">🚀 DAĞITILACAKLAR</div>
-        <div class="scroll-area" id="dagitim"></div>
-        <div class="footer-btns">
-            <button class="aksiyon-btn" style="background:#c0392b; font-size:11px;" onclick="tumSistemiResetle()">⚠️ TÜMÜNÜ SIFIRLA</button>
-        </div>
-    </div>
+<div class="ozet-alan">
+    <h3 style="margin-top:0; color:var(--ana-renk)">🔥 Mutfak Durumu</h3>
+    <div id="mutfakListesi">Henüz bekleyen sipariş yok.</div>
 </div>
 
-<div id="rezModal" class="modal">
-    <div class="modal-icerik">
-        <h3 id="rezMasaBaslik" style="margin-top:0; color:var(--rez-renk)">Rezervasyon</h3>
-        <input type="text" id="rezIsim" placeholder="Müşteri Adı Soyadı" style="width:100%; padding:15px; margin-bottom:15px; box-sizing:border-box; background:#2c2c2c; color:white; border:1px solid #444; border-radius:5px; font-size:16px;">
-        <button class="aksiyon-btn rez-btn" style="width:100%" onclick="rezervasyonKaydet()">KAYDET</button>
-        <button class="aksiyon-btn" style="width:100%; background:#444; margin-top:10px;" onclick="modalKapat('rezModal')">İPTAL</button>
-    </div>
-</div>
-
-<div id="rezListModal" class="modal">
-    <div class="modal-icerik">
-        <h3 style="color:var(--rez-renk); margin-top:0;">🔍 Rezervasyon Arama</h3>
-        <input type="text" id="rezAramaInput" class="arama-kutusu" placeholder="İsim ile ara..." onkeyup="rezAramaYap()">
-        <div id="rezListesi" style="max-height:400px; overflow-y:auto;"></div>
-        <button class="aksiyon-btn" style="width:100%; background:#444; margin-top:15px;" onclick="modalKapat('rezListModal')">KAPAT</button>
-    </div>
-</div>
-
-<div id="ozetModal" class="modal">
-    <div class="modal-icerik">
-        <h3 style="margin-top:0; color:#3498db">📊 Mutfak Toplam</h3>
-        <div id="ozetListe" style="margin-bottom:15px;"></div>
-        <button class="aksiyon-btn" style="background:var(--wp-renk); width:100%; margin-top:10px;" onclick="whatsappGonder()">WhatsApp'a At ✅</button>
-        <button class="aksiyon-btn" style="background:#444; width:100%; margin-top:10px;" onclick="modalKapat('ozetModal')">Kapat</button>
+<div id="siparisPanel" class="siparis-panel">
+    <div class="header" id="panelMasaBaslik">MASA X - SİPARİŞ AL</div>
+    <div class="urun-listesi" id="menuAlan"></div>
+    <div class="alt-menu">
+        <button class="btn" style="background:#555" onclick="panelKapat()">İPTAL</button>
+        <button class="btn" style="background:var(--ana-renk)" onclick="mutfagaGonder()">USTAYA GÖNDER 👨‍🍳</button>
     </div>
 </div>
 
 <script>
-    const Menu = {
-        "LAHMACUNLAR": ["Acılı Lahmacun", "Acısız Lahmacun"],
-        "PİDELER": ["Kıymalı Pide", "Kıymalı Kaşarlı", "Kuşbaşılı Pide", "Kuşbaşı Kaşarlı", "Karışık Pide", "Kaşarlı Pide", "Sucuklu Kaşarlı"],
-        "KEBAPLAR": ["Tavuk Şiş Menü", "Adana Menü", "Urfa Menü", "Beyti Menü", "Tavuk Kanat", "Karışık Izgara", "Köfte Porsiyon"],
-        "İÇECEKLER": ["Coca Cola", "Fanta", "Sprite", "Büyük Ayran"]
-    };
-
-    const urunList = Object.values(Menu).flat();
-    const OzelMasalar = ["Personel", "Fırın Yanı", "Yeni Masa", "Şark Köşesi"];
-    let temp = {};
+    const Masalar = ["Masa 1", "Masa 2", "Masa 3", "Masa 4", "Masa 5", "Masa 6", "Masa 7", "Masa 8", "Personel", "VİP"];
+    const Menu = ["Acılı Lahmacun", "Kıymalı Pide", "Kuşbaşılı", "Adana Menü", "Tavuk Şiş", "Ayran", "Kola"];
+    
+    let aktifSiparisler = JSON.parse(localStorage.getItem("divan_v12_aktif")) || {};
+    let seciliMasa = null;
+    let tempSepet = {};
 
     function init() {
-        masaListesiniGuncelle();
-        const katAlan = document.getElementById("kategoriAlanlari");
-        for(let kat in Menu) {
-            let html = `<div class="kat-baslik">${kat}</div><div class="urun-grid">`;
-            Menu[kat].forEach(u => {
-                html += `<button class="urun-btn" onclick="adetArt('${u}')" oncontextmenu="event.preventDefault(); adetAzalt('${u}')">${u}<span class="badge" id="badge-${idYap(u)}" style="display:none">0</span></button>`;
-            });
-            katAlan.innerHTML += html + `</div>`;
-        }
-        dagitimGoster();
+        haritaCiz();
+        setInterval(sureGuncelle, 10000); // 10 saniyede bir süreleri ve renkleri kontrol et
     }
 
-    function idYap(text) { return text.replace(/[^a-zA-Z0-9]/g, "_"); }
+    function haritaCiz() {
+        const h = document.getElementById("masaHaritasi");
+        h.innerHTML = "";
+        Masalar.forEach(m => {
+            const s = aktifSiparisler[m];
+            let classEk = "";
+            let sureYazisi = "Boş";
 
-    function masaListesiniGuncelle() {
-        const select = document.getElementById("masaSelect");
-        const rezler = JSON.parse(localStorage.getItem("rezervasyonlar") || "{}");
-        const aktifMasa = select.value;
-        select.innerHTML = '<option value="">Masa Seçiniz...</option>';
-        for(let i=1; i<=15; i++) {
-            let mName = "Masa " + i;
-            select.innerHTML += `<option value="${mName}">${rezler[mName] ? "📅 " : ""}${mName}</option>`;
-        }
-        OzelMasalar.forEach(m => {
-            select.innerHTML += `<option value="${m}">${rezler[m] ? "📅 " : ""}${m}</option>`;
-        });
-        select.value = aktifMasa;
-    }
-
-    function masaDegisti() {
-        const mKey = document.getElementById("masaSelect").value;
-        const dDiv = document.getElementById("masaDurum");
-        if(!mKey) { dDiv.innerHTML = "Lütfen işlem yapılacak masayı seçin."; return; }
-        let db = JSON.parse(localStorage.getItem("siparisler") || "{}");
-        let rezler = JSON.parse(localStorage.getItem("rezervasyonlar") || "{}");
-        let html = rezler[mKey] ? `<span class="rez-bilgi">👤 REZERVE: ${rezler[mKey]}</span>` : "";
-        html += db[mKey] ? `<b>📍 Siparişler:</b><br>` + Object.entries(db[mKey]).map(([u, a]) => `${a}x ${u}`).join("<br>") : `<b>${mKey}</b> masası boş.`;
-        dDiv.innerHTML = html;
-    }
-
-    function rezListesiAc() {
-        document.getElementById("rezAramaInput").value = "";
-        rezAramaYap();
-        document.getElementById("rezListModal").style.display = "block";
-    }
-
-    function rezAramaYap() {
-        const aramaKelimesi = document.getElementById("rezAramaInput").value.toLowerCase();
-        const rezler = JSON.parse(localStorage.getItem("rezervasyonlar") || "{}");
-        const listeDiv = document.getElementById("rezListesi");
-        listeDiv.innerHTML = "";
-        let varMi = false;
-        for(let m in rezler) {
-            if(rezler[m].toLowerCase().includes(aramaKelimesi)) {
-                varMi = true;
-                listeDiv.innerHTML += `<div class="rez-kart"><div><b>${m}</b><br><small>${rezler[m]}</small></div><button class="teslim-btn" style="background:var(--sil-renk)" onclick="rezSil('${m}')">SİL</button></div>`;
+            if(s) {
+                const gecenDakika = Math.floor((new Date() - new Date(s.saat)) / 60000);
+                sureYazisi = gecenDakika + " dk önce";
+                classEk = s.durum === "hazir" ? "hazir" : (gecenDakika > 15 ? "gecikmis" : "dolu");
             }
+
+            h.innerHTML += `
+                <div class="masa-kart ${classEk}" onclick="masaTikla('${m}')">
+                    <div class="masa-no">${m}</div>
+                    <div class="masa-sure">${sureYazisi}</div>
+                </div>
+            `;
+        });
+        mutfakListesiGuncelle();
+    }
+
+    function masaTikla(m) {
+        if (aktifSiparisler[m]) {
+            if (aktifSiparisler[m].durum === "hazir") {
+                if(confirm(m + " siparişini teslim ettin mi?")) {
+                    delete aktifSiparisler[m];
+                    kaydet();
+                }
+            } else {
+                if(confirm(m + " siparişi HAZIR MI? (Usta bitirdi mi?)")) {
+                    aktifSiparisler[m].durum = "hazir";
+                    kaydet();
+                }
+            }
+        } else {
+            seciliMasa = m;
+            tempSepet = {};
+            document.getElementById("panelMasaBaslik").innerText = m + " - SİPARİŞ AL";
+            menuCiz();
+            document.getElementById("siparisPanel").style.display = "flex";
         }
-        if(!varMi) listeDiv.innerHTML = "<p style='text-align:center; color:#888;'>Kayıt bulunamadı.</p>";
     }
 
-    function rezSil(m) {
-        let rezler = JSON.parse(localStorage.getItem("rezervasyonlar") || "{}");
-        delete rezler[m];
-        localStorage.setItem("rezervasyonlar", JSON.stringify(rezler));
-        rezAramaYap(); masaListesiniGuncelle(); masaDegisti();
-    }
-
-    function rezervasyonAc() {
-        const mKey = document.getElementById("masaSelect").value;
-        if(!mKey) return alert("Önce masa seç kanka!");
-        document.getElementById("rezMasaBaslik").innerText = mKey + " Rezervasyon";
-        document.getElementById("rezModal").style.display = "block";
-    }
-
-    function rezervasyonKaydet() {
-        const mKey = document.getElementById("masaSelect").value;
-        const isim = document.getElementById("rezIsim").value;
-        if(!isim) return alert("İsim yaz!");
-        let rezler = JSON.parse(localStorage.getItem("rezervasyonlar") || "{}");
-        rezler[mKey] = isim;
-        localStorage.setItem("rezervasyonlar", JSON.stringify(rezler));
-        document.getElementById("rezIsim").value = "";
-        modalKapat('rezModal');
-        masaListesiniGuncelle(); masaDegisti();
-    }
-
-    function adetArt(u) { temp[u] = (temp[u] || 0) + 1; arayuzGuncelle(); }
-    function adetAzalt(u) { if(temp[u] > 0) { temp[u]--; if(temp[u] === 0) delete temp[u]; arayuzGuncelle(); } }
-    function arayuzGuncelle() { urunList.forEach(u => { const b = document.getElementById("badge-" + idYap(u)); if(b) { b.innerText = temp[u] || 0; b.style.display = temp[u] ? "block" : "none"; } }); }
-    function tempSifirla() { temp = {}; arayuzGuncelle(); }
-    
-    function kaydet() {
-        const mKey = document.getElementById("masaSelect").value;
-        if(!mKey || Object.keys(temp).length === 0) return alert("Masa veya ürün eksik!");
-        let db = JSON.parse(localStorage.getItem("siparisler") || "{}");
-        if(!db[mKey]) db[mKey] = {};
-        Object.entries(temp).forEach(([u, a]) => db[mKey][u] = (db[mKey][u] || 0) + a);
-        localStorage.setItem("siparisler", JSON.stringify(db));
-        tempSifirla(); masaDegisti(); dagitimGoster();
-    }
-
-    function dagitimGoster() {
-        const db = JSON.parse(localStorage.getItem("siparisler") || "{}");
-        const dDiv = document.getElementById("dagitim"); dDiv.innerHTML = "";
-        urunList.forEach(u => {
-            let html = ""; let t = 0;
-            for (let m in db) if (db[m][u]) { t += db[m][u]; html += `<div class="kart"><span>${m} (x${db[m][u]})</span><button class="teslim-btn" onclick="teslim('${m}','${u}')">OK</button></div>`; }
-            if(t > 0) dDiv.innerHTML += `<div class="dagitim-grup"><div class="urun-baslik"><span>${u}</span><span>${t}</span></div>${html}</div>`;
+    function menuCiz() {
+        const mAlan = document.getElementById("menuAlan");
+        mAlan.innerHTML = "";
+        Menu.forEach(u => {
+            mAlan.innerHTML += `
+                <div class="urun-item" onclick="sepeteEkle('${u}')">
+                    ${u} <br> <b id="adet-${u}">${tempSepet[u] || 0}</b>
+                </div>
+            `;
         });
     }
 
-    function teslim(m, u) {
-        let db = JSON.parse(localStorage.getItem("siparisler") || "{}");
-        db[m][u]--; if(db[m][u] <= 0) delete db[m][u]; if(Object.keys(db[m]).length === 0) delete db[m];
-        localStorage.setItem("siparisler", JSON.stringify(db)); dagitimGoster(); masaDegisti();
+    function sepeteEkle(u) {
+        tempSepet[u] = (tempSepet[u] || 0) + 1;
+        document.getElementById("adet-"+u).innerText = tempSepet[u];
     }
 
-    function ozetGoster() {
-        let db = JSON.parse(localStorage.getItem("siparisler") || "{}"), t = {};
-        for(let m in db) for(let u in db[m]) t[u] = (t[u] || 0) + db[m][u];
-        document.getElementById("ozetListe").innerHTML = Object.entries(t).map(([u, a]) => `<div style="display:flex; justify-content:space-between; border-bottom:1px solid #333; padding:10px;"><span>${u}</span><b>${a}</b></div>`).join("") || "Sipariş yok.";
-        document.getElementById("ozetModal").style.display = "block";
+    function mutfagaGonder() {
+        if(Object.keys(tempSepet).length === 0) return alert("Ürün seçmedin!");
+        aktifSiparisler[seciliMasa] = {
+            urunler: {...tempSepet},
+            saat: new Date(),
+            durum: "mutfakta"
+        };
+        kaydet();
+        panelKapat();
     }
 
-    function whatsappGonder() {
-        let db = JSON.parse(localStorage.getItem("siparisler") || "{}"), m = "*🚀 DİVAN MUTFAK*\n", t = {};
-        for(let ms in db) {
-            let s = []; for(let ur in db[ms]) { s.push(`${db[ms][ur]}x ${ur}`); t[ur] = (t[ur] || 0) + db[ms][ur]; }
-            if(s.length) m += `\n*${ms}:* ${s.join(", ")}`;
+    function mutfakListesiGuncelle() {
+        const l = document.getElementById("mutfakListesi");
+        let html = "";
+        for(let m in aktifSiparisler) {
+            const s = aktifSiparisler[m];
+            const uList = Object.entries(s.urunler).map(([u, a]) => `${a}x ${u}`).join(", ");
+            html += `<div style="padding:5px 0; border-bottom:1px solid #333; color:${s.durum==='hazir'?'#27ae60':'#e67e22'}">
+                <b>${m}:</b> ${uList} <small>(${s.durum})</small>
+            </div>`;
         }
-        m += "\n\n*TOPLAM:* " + Object.entries(t).map(([u, a]) => `\n- ${u}: ${a}`).join("");
-        window.open(`https://wa.me/?text=${encodeURIComponent(m)}`, '_blank');
+        l.innerHTML = html || "Bekleyen sipariş yok.";
     }
 
-    function modalKapat(id) { document.getElementById(id).style.display = "none"; }
-    function tumSistemiResetle() { if(confirm("Her şey silinecek, emin misin?")) { localStorage.clear(); location.reload(); } }
+    function sureGuncelle() { haritaCiz(); }
+    function panelKapat() { document.getElementById("siparisPanel").style.display = "none"; }
+    function kaydet() {
+        localStorage.setItem("divan_v12_aktif", JSON.stringify(aktifSiparisler));
+        haritaCiz();
+    }
 
     init();
 </script>
 </body>
 </html>
-
