@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Divan Garson v13</title>
+    <title>Divan Garson v14</title>
     <style>
         :root { 
             --ana-renk: #e67e22; 
@@ -14,89 +14,84 @@
             --arka-plan: #000; 
         }
         
-        body { font-family: 'Segoe UI', sans-serif; background: var(--arka-plan); color: #fff; margin: 0; padding: 10px; overflow-x: hidden; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--arka-plan); color: #fff; margin: 0; padding: 10px; overflow-x: hidden; user-select: none; -webkit-user-select: none; }
         
-        /* MOBİL MASA GRID: Yan yana 3 masa */
+        .header { text-align: center; padding: 10px 0; color: var(--ana-renk); font-weight: bold; border-bottom: 1px solid #333; margin-bottom: 15px; }
+
         .masa-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 10px;
-            margin-bottom: 20px;
         }
 
         .masa-kart {
-            height: 90px;
-            border-radius: 10px;
+            height: 100px;
+            border-radius: 12px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
-            border: 1px solid rgba(255,255,255,0.1);
             background: var(--bos-renk);
-            text-align: center;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: transform 0.1s;
+            position: relative;
         }
 
+        .masa-kart:active { transform: scale(0.95); }
         .masa-kart.dolu { background: var(--mutfakta-renk); }
         .masa-kart.hazir { background: var(--hazir-renk); box-shadow: 0 0 15px var(--hazir-renk); }
         .masa-kart.gecikmis { background: var(--gecikme-renk); animation: shake 0.5s infinite; }
 
-        .masa-no { font-size: 16px; font-weight: bold; }
-        .masa-sure { font-size: 10px; margin-top: 4px; opacity: 0.7; }
+        .masa-no { font-size: 18px; font-weight: bold; }
+        .masa-sure { font-size: 11px; margin-top: 5px; opacity: 0.8; text-align: center; padding: 0 5px; overflow: hidden; }
 
-        /* NOT DEFTERİ PANELİ */
+        /* PANEL */
         .siparis-panel {
-            position: fixed; top: 10%; left: 5%; width: 90%; height: auto;
+            position: fixed; bottom: 20px; left: 5%; width: 90%; 
             background: #1a1a1a; border: 2px solid var(--ana-renk);
-            border-radius: 15px; display: none; flex-direction: column; z-index: 1000;
-            padding: 15px; box-sizing: border-box;
+            border-radius: 20px; display: none; flex-direction: column; z-index: 1000;
+            padding: 20px; box-sizing: border-box; box-shadow: 0 -10px 30px rgba(0,0,0,0.5);
         }
 
         .not-alani {
-            width: 100%; height: 150px; background: #333; color: #fff;
-            border: 1px solid #444; border-radius: 8px; padding: 10px;
-            font-size: 18px; margin-bottom: 15px; box-sizing: border-box;
-            resize: none;
+            width: 100%; height: 180px; background: #222; color: #fff;
+            border: 1px solid #444; border-radius: 10px; padding: 12px;
+            font-size: 20px; margin-bottom: 15px; box-sizing: border-box; resize: none;
         }
 
         .btn-grup { display: flex; gap: 10px; }
-        .btn { flex: 1; padding: 15px; border-radius: 8px; border: none; font-weight: bold; color: white; font-size: 14px; }
+        .btn { flex: 1; padding: 18px; border-radius: 10px; border: none; font-weight: bold; color: white; font-size: 16px; cursor: pointer; }
 
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(2px); } 75% { transform: translateX(-2px); } }
-
-        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; z-index: 999; }
-        .header { text-align: center; padding: 5px 0 15px 0; color: var(--ana-renk); font-weight: bold; }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; z-index: 999; }
     </style>
 </head>
 <body>
 
-<div class="header">📋 DİVAN GARSON DEFTERİ</div>
+<div class="header">📋 DİVAN GARSON v14</div>
 
 <div id="masaHaritasi" class="masa-grid"></div>
 
 <div id="overlay" class="overlay" onclick="panelKapat()"></div>
 
 <div id="siparisPanel" class="siparis-panel">
-    <h3 id="panelBaslik" style="margin-top:0; color:var(--ana-renk)">Masa X</h3>
-    <textarea id="siparisNotu" class="not-alani" placeholder="Siparişi buraya yaz kanka..."></textarea>
+    <h2 id="panelBaslik" style="margin-top:0; color:var(--ana-renk)">Masa</h2>
+    <textarea id="siparisNotu" class="not-alani" placeholder="Siparişi yaz..."></textarea>
     <div class="btn-grup">
-        <button class="btn" style="background:#555" onclick="panelKapat()">İPTAL</button>
+        <button id="hazirBtn" class="btn" style="background:var(--hazir-renk); display:none;" onclick="durumDegistir('hazir')">HAZIR 🥗</button>
         <button class="btn" style="background:var(--ana-renk)" onclick="notuKaydet()">KAYDET ✅</button>
     </div>
 </div>
 
 <script>
-    // 1-13 arası masalar + Personel
-    const Masalar = [];
-    for(let i=1; i<=13; i++) Masalar.push("Masa " + i);
-    Masalar.push("Personel");
-    
-    let aktifSiparisler = JSON.parse(localStorage.getItem("divan_v13_notlar")) || {};
+    const Masalar = Array.from({length: 13}, (_, i) => "Masa " + (i + 1)).concat("Personel");
+    let aktifSiparisler = JSON.parse(localStorage.getItem("divan_v14_notlar")) || {};
     let seciliMasa = null;
+    let pressTimer;
 
     function init() {
         haritaCiz();
-        setInterval(haritaCiz, 30000); // 30 saniyede bir süreleri tazele
+        setInterval(haritaCiz, 30000);
     }
 
     function haritaCiz() {
@@ -105,72 +100,74 @@
         Masalar.forEach(m => {
             const s = aktifSiparisler[m];
             let classEk = "";
-            let altYazi = "Boş";
+            let altYazi = "BOŞ";
 
             if(s) {
                 const gecenDakika = Math.floor((new Date() - new Date(s.saat)) / 60000);
-                altYazi = gecenDakika + " dk / " + s.not.substring(0, 15) + "...";
-                
+                altYazi = `${gecenDakika} dk<br>${s.not.substring(0, 12)}...`;
                 if(s.durum === "hazir") classEk = "hazir";
                 else if(gecenDakika > 20) classEk = "gecikmis";
                 else classEk = "dolu";
             }
 
-            h.innerHTML += `
-                <div class="masa-kart ${classEk}" onclick="masaTikla('${m}')">
-                    <div class="masa-no">${m}</div>
-                    <div class="masa-sure">${altYazi}</div>
-                </div>
-            `;
+            const div = document.createElement("div");
+            div.className = `masa-kart ${classEk}`;
+            div.innerHTML = `<div class="masa-no">${m}</div><div class="masa-sure">${altYazi}</div>`;
+            
+            // Tıklama (Açma)
+            div.onclick = () => masaTikla(m);
+            
+            // Uzun Basma (Silme) - Mobil Uyumluluk için
+            div.ontouchstart = (e) => { pressTimer = setTimeout(() => masaSil(m), 800); };
+            div.ontouchend = () => clearTimeout(pressTimer);
+            div.onmousedown = () => { pressTimer = setTimeout(() => masaSil(m), 800); };
+            div.onmouseup = () => clearTimeout(pressTimer);
+
+            h.appendChild(div);
         });
     }
 
     function masaTikla(m) {
         seciliMasa = m;
         const s = aktifSiparisler[m];
+        document.getElementById("panelBaslik").innerText = m;
+        document.getElementById("siparisNotu").value = s ? s.not : "";
+        document.getElementById("hazirBtn").style.display = (s && s.durum !== 'hazir') ? "block" : "none";
+        panelAc();
+    }
 
-        if (!s) {
-            // Masa Boş: Not Defterini Aç
-            document.getElementById("panelBaslik").innerText = m + " - Yeni Sipariş";
-            document.getElementById("siparisNotu").value = "";
-            panelAc();
-        } else if (s.durum === "mutfakta") {
-            // Mutfakta: Hazır mı veya Düzenle mi?
-            let islem = confirm(m + " İÇİN İŞLEM SEÇ:\n\nTAMAM: Sipariş Hazır (Yeşil Yap)\nİPTAL: Notu Düzenle");
-            if(islem) {
-                s.durum = "hazir";
-                kaydet();
-            } else {
-                document.getElementById("panelBaslik").innerText = m + " - Düzenle";
-                document.getElementById("siparisNotu").value = s.not;
-                panelAc();
-            }
-        } else if (s.durum === "hazir") {
-            // Hazır: Teslim edildi mi?
-            if(confirm(m + " teslim edildi mi? (Masa Boşalacak)")) {
-                delete aktifSiparisler[m];
-                kaydet();
-            }
-        }
+    function masaSil(m) {
+        if (!aktifSiparisler[m]) return;
+        if(navigator.vibrate) navigator.vibrate(100); // Başarıyla silindiğini hissettir
+        delete aktifSiparisler[m];
+        kaydet();
     }
 
     function notuKaydet() {
         const not = document.getElementById("siparisNotu").value;
-        if(!not.trim()) return alert("Bir şeyler yaz kanka!");
+        if(!not.trim()) return panelKapat();
         
-        aktifSiparisler[seciliMasa] = {
-            not: not,
-            saat: new Date(),
-            durum: "mutfakta"
-        };
+        if (!aktifSiparisler[seciliMasa]) {
+            aktifSiparisler[seciliMasa] = { not: not, saat: new Date(), durum: "mutfakta" };
+        } else {
+            aktifSiparisler[seciliMasa].not = not;
+        }
         kaydet();
         panelKapat();
+    }
+
+    function durumDegistir(yeniDurum) {
+        if(aktifSiparisler[seciliMasa]) {
+            aktifSiparisler[seciliMasa].durum = yeniDurum;
+            kaydet();
+            panelKapat();
+        }
     }
 
     function panelAc() {
         document.getElementById("siparisPanel").style.display = "flex";
         document.getElementById("overlay").style.display = "block";
-        document.getElementById("siparisNotu").focus();
+        setTimeout(() => document.getElementById("siparisNotu").focus(), 100);
     }
 
     function panelKapat() {
@@ -179,7 +176,7 @@
     }
 
     function kaydet() {
-        localStorage.setItem("divan_v13_notlar", JSON.stringify(aktifSiparisler));
+        localStorage.setItem("divan_v14_notlar", JSON.stringify(aktifSiparisler));
         haritaCiz();
     }
 
